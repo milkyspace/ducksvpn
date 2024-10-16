@@ -1,25 +1,8 @@
 import time
-import os
 import pymysql
 import pymysql.cursors
-from dotenv import load_dotenv
 
-load_dotenv()
-
-CONFIG = {
-    "admin_tg_id": [int(os.getenv("ADMIN_TG_ID_1")), int(os.getenv("ADMIN_TG_ID_2"))],
-    "one_month_cost": float(os.getenv("ONE_MONTH_COST")),
-    "trial_period": os.getenv("TRIAL_PERIOD"),
-    "perc_1": float(os.getenv("PERC_1")),
-    "perc_3": float(os.getenv("PERC_3")),
-    "perc_6": float(os.getenv("PERC_6")),
-    "UTC_time": int(os.getenv("UTC_TIME")),
-    "tg_token": os.getenv("TG_TOKEN"),
-    "tg_shop_token": os.getenv("TG_SHOP_TOKEN"),
-    "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
-    "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
-    "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
-}
+CONFIG={}
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]

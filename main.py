@@ -39,12 +39,17 @@ CONFIG = {
     "tg_shop_token": os.getenv("TG_SHOP_TOKEN"),
     "count_free_from_referrer": int(os.getenv("COUNT_FREE_FROM_REFERRER")),
     "bot_name": os.getenv("BOT_NAME"),
+    "db_host": os.getenv("DB_HOST"),
+    "db_name": os.getenv("DB_NAME"),
+    "db_user": os.getenv("DB_USER"),
+    "db_password": os.getenv("DB_PASSWORD"),
     "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
     "server_manager_api_token": os.getenv("SERVER_MANAGER_API_TOKEN"),
 }
 
 dbworker.CONFIG = CONFIG
 buttons.CONFIG = CONFIG
+smrequests.CONFIG = CONFIG
 
 with open("texts.json", encoding="utf-8") as file_handler:
     text_mess = json.load(file_handler)
@@ -55,10 +60,10 @@ BOTAPIKEY = CONFIG["tg_token"]
 
 bot = AsyncTeleBot(CONFIG["tg_token"], state_storage=StateMemoryStorage())
 
-DBHOST = "localhost"
-DBUSER = "vpnducks"
-DBPASSWORD = "199612Kolva"
-DBNAME = "ducksvpn"
+DBHOST = CONFIG["db_host"]
+DBUSER = CONFIG["db_name"]
+DBPASSWORD = CONFIG["db_user"]
+DBNAME = CONFIG["db_password"]
 
 
 class MyStates(StatesGroup):

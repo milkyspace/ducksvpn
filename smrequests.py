@@ -1,15 +1,7 @@
 import requests
 import json
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-CONFIG = {
-    "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
-    "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
-    "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
-}
+CONFIG={}
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
@@ -45,7 +37,7 @@ def getTokenDefault(breakLoop=True):
 async def addUser(userid, username):
     token = f"Bearer {await getToken()}"
     response = requests.post(
-        f"{SERVER_MANAGER_URL}/vpnusers",
+        f"{SERVER_MANAGER_URL}/vpnservers",
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
@@ -64,7 +56,7 @@ async def addUser(userid, username):
 
 async def getConnectionLinks(tgId):
     token = f"Bearer {await getToken()}"
-    response = requests.get(f"{SERVER_MANAGER_URL}/vpnusers/{tgId}/getLink",
+    response = requests.get(f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getLink",
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
                                      "Authorization": token})
@@ -104,7 +96,7 @@ async def switchUserActivity(tgid, val):
 
     token = f"Bearer {await getToken()}"
     response = requests.put(
-        f"{SERVER_MANAGER_URL}/vpnusers/{tgid}",
+        f"{SERVER_MANAGER_URL}/vpnservers/{tgid}",
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
