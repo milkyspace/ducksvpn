@@ -1,8 +1,33 @@
 import time
+import os
+from dotenv import load_dotenv
 import pymysql
 import pymysql.cursors
 
-CONFIG={}
+load_dotenv()
+
+CONFIG = {
+    "admin_tg_id": [int(os.getenv("ADMIN_TG_ID_1")), int(os.getenv("ADMIN_TG_ID_2"))],
+    "one_month_cost": float(os.getenv("ONE_MONTH_COST")),
+    "trial_period": os.getenv("TRIAL_PERIOD"),
+    "perc_1": float(os.getenv("PERC_1")),
+    "perc_3": float(os.getenv("PERC_3")),
+    "perc_6": float(os.getenv("PERC_6")),
+    "perc_12": float(os.getenv("PERC_12")),
+    "UTC_time": int(os.getenv("UTC_TIME")),
+    "tg_token": os.getenv("TG_TOKEN"),
+    "tg_shop_token": os.getenv("TG_SHOP_TOKEN"),
+    "count_free_from_referrer": int(os.getenv("COUNT_FREE_FROM_REFERRER")),
+    "bot_name": os.getenv("BOT_NAME"),
+    "db_host": os.getenv("DB_HOST"),
+    "db_name": os.getenv("DB_NAME"),
+    "db_user": os.getenv("DB_USER"),
+    "db_password": os.getenv("DB_PASSWORD"),
+    "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
+    "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
+    "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
+    "server_manager_api_token": os.getenv("SERVER_MANAGER_API_TOKEN"),
+}
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
@@ -24,6 +49,7 @@ class User:
         self.username = None
         self.fullname = None
         self.referrer_id = None
+        self.type = None
 
     @classmethod
     async def GetInfo(cls, tgid):
@@ -45,6 +71,7 @@ class User:
             self.username = log["username"]
             self.fullname = log["fullname"]
             self.referrer_id = log["referrer_id"]
+            self.type = log["type"]
         else:
             self.registered = False
         return self
@@ -92,9 +119,9 @@ class User:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"INSERT INTO userss (tgid,subscription,username,fullname,referrer_id) values (%s,%s,%s,%s,%s)",
+                f"INSERT INTO userss (tgid,subscription,username,fullname,referrer_id, type) values (%s,%s,%s,%s,%s,%s)",
                 (self.tgid, str(int(time.time()) + int(CONFIG['trial_period']) * 86400), str(username),
-                 str(full_name), referrer_id))
+                 str(full_name), referrer_id, 'xui'))
             conn.commit()
             dbCur.close()
             conn.close()
@@ -154,6 +181,31 @@ class User:
         dbCur.close()
         conn.close()
 
-        print()
-
         return 0 if log[0] is None else log[0]['count']
+
+    async def changeType(self):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute("SELECT * FROM userss WHERE tgid= %s ", (self.tgid,))
+        log = dbCur.fetchone()
+        dbCur.close()
+        conn.close()
+
+        if log is None:
+            return False
+
+        newType = 'xui'
+        if log['type'] is None or log['type'] == 'xui':
+            newType = 'amnezia'
+        elif log['type'] == 'amnezia':
+            newType = 'xui'
+
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set type = %s where id = %s",
+                      (newType, self.id))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        return True

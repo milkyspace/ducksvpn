@@ -2,8 +2,8 @@ import json
 import time
 import buttons
 import dbworker
+import smrequests
 import emoji as e
-import asyncio
 import threading
 import os
 import traceback
@@ -19,7 +19,7 @@ from telebot.asyncio_storage import StateMemoryStorage
 from telebot.asyncio_handler_backends import State, StatesGroup
 from buttons import main_buttons
 
-from smrequests import getConnectionLinks, switchUserActivity, addUser
+from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
 from dbworker import User
 
 from dotenv import load_dotenv
@@ -44,6 +44,8 @@ CONFIG = {
     "db_user": os.getenv("DB_USER"),
     "db_password": os.getenv("DB_PASSWORD"),
     "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
+    "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
+    "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
     "server_manager_api_token": os.getenv("SERVER_MANAGER_API_TOKEN"),
 }
 
@@ -129,31 +131,57 @@ async def sendConfig(chatId):
         await sendPayMessage(chatId)
 
 
-async def sendConfigAndInstructions(chatId, device='iPhone'):
+async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
     user_dat = await User.GetInfo(chatId)
     tgId = str(user_dat.tgid)
 
-    connectionLinks = await getConnectionLinks(tgId)
-    if connectionLinks['success']:
-        data = connectionLinks['data']
-        link = data['link']
+    if type == 'xui':
+        connectionLinks = await getConnectionLinks(tgId)
+        if connectionLinks['success']:
+            data = connectionLinks['data']
+            link = data['link']
 
-        instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение --- для iOS из AppStore\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
-        instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение --- для Android из Google Play</a>\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
-        instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите --- для Windows</a> или --- для MacOS</a>\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
-        if (device == "iPhone"):
-            await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionIPhone), parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat, True))
-        if (device == "Android"):
-            await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionAndroid), parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat, True))
-        if (device == "PC"):
-            await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionPC), parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat, True))
-    else:
-        await bot.send_message(user_dat.tgid,
-                               f"Вы не подключены к нашему впн.\n\rЗа помощью обратитесь к @vpnducks_support",
-                               reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
+            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение --- для iOS из AppStore\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение --- для Android из Google Play</a>\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите --- для Windows</a> или --- для MacOS</a>\n\r2. Скопируйте строку\n\r<code>{link}</code>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            if (device == "iPhone"):
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionIPhone), parse_mode="HTML",
+                                       reply_markup=await main_buttons(user_dat, True))
+            if (device == "Android"):
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionAndroid), parse_mode="HTML",
+                                       reply_markup=await main_buttons(user_dat, True))
+            if (device == "PC"):
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionPC), parse_mode="HTML",
+                                       reply_markup=await main_buttons(user_dat, True))
+        else:
+            await bot.send_message(user_dat.tgid,
+                                   f"Вы не подключены к нашему впн.\n\rЗа помощью обратитесь к @vpnducks_support",
+                                   reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
+    elif type == 'amnezia':
+        fileResponse = await getAmneziaConnectionFile(tgId)
+        if fileResponse['success']:
+            data = fileResponse['data']
+            configFull = data['file']
+
+            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href='https://apps.apple.com/ru/app/amneziavpn/id1600529900'>AmneziaVPN для iOS из AppStore</a>\n\r2. Откройте прикрепленный выше файл конфигурации vpnducks_{str(user_dat.tgid)}.conf\n\r3. Нажмите на иконку поделиться в левом нижнем углу\n\r4. Найдите AmneziaVPN среди предложенных приложений и кликните по нему\n\r5. Откроется приложение AmneziaVPN и спросит о добавлении конфигурации, согласитесь на добавление конфигурации\n\r6. Нажмите на большую круглую кнопку подключиться на главном экране приложения. Готово\n\r\n\r<a href='https://t.me/vpnducks_video/4'>Видео-инструкция</a>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение <a href='https://play.google.com/store/apps/details?id=org.amnezia.vpn'>AmneziaVPN для Android из Google Play</a>\n\r2. Откройте прикрепленный выше файл конфигурации vpnducks_{str(user_dat.tgid)}.conf с помощью приложения AmneziaVPN\n\r3. Откроется приложение AmneziaVPN, нажмите на кнопку подключиться\n\r4. Нажмите на большую круглую кнопку подключиться на главном экране приложения и разрешите смартфону установить VPN соединение. Готово\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите AmneziaVPN <a href='https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0_x64.exe'>для Windows</a> или <a href='https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0.dmg'>для MacOS</a>\n\r2. Установите скачанную программу\n\r3.Откройте прикрепленный выше файл конфигурации vpnducks_{str(user_dat.tgid)}.conf в программе AmneziaVPN\n\r4. Нажмите на кнопку подключиться\n\r5. Нажмите на большую круглую кнопку подключиться на главном экране программы и разрешите установить VPN соединение. Готово\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            if (device == "iPhone"):
+                await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionIPhone), parse_mode="HTML",
+                                        reply_markup=await main_buttons(user_dat, True), document=configFull,
+                                        visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
+            if (device == "Android"):
+                await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionAndroid), parse_mode="HTML",
+                                        reply_markup=await main_buttons(user_dat, True), document=configFull,
+                                        visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
+            if (device == "PC"):
+                await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionPC), parse_mode="HTML",
+                                        reply_markup=await main_buttons(user_dat, True), document=configFull,
+                                        visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
+        else:
+            await bot.send_message(user_dat.tgid,
+                                   f"Вы не подключены к нашему впн.\n\rЗа помощью обратитесь к @vpnducks_support",
+                                   reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
 
 
 async def addTrialForReferrerByUserId(userId):
@@ -634,6 +662,7 @@ async def Work_with_Message(m: types.Message):
             types.InlineKeyboardButton(e.emojize(":credit_card: Обновить информацию о подписке"),
                                        callback_data="Help:update"),
             types.InlineKeyboardButton(e.emojize(":heart_hands: Поддержка"), callback_data="Help:support"),
+            types.InlineKeyboardButton(e.emojize(":repeat_button: Сменить протокол"), callback_data="Help:change_type"),
         )
         await bot.send_message(chat_id=m.chat.id, text=msg, parse_mode="HTML", reply_markup=helpButtons)
         return
@@ -654,7 +683,7 @@ async def Work_with_Message(m: types.Message):
 async def Init(call: types.CallbackQuery):
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
-    await sendConfigAndInstructions(user_dat.tgid, device)
+    await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await bot.answer_callback_query(call.id)
 
 
@@ -664,6 +693,12 @@ async def Init(call: types.CallbackQuery):
     command = str(call.data).split(":")[1]
     if command == 'update':
         await bot.send_message(user_dat.tgid, e.emojize('Информация о подписке обновлена'), parse_mode="HTML",
+                               reply_markup=await main_buttons(user_dat, True))
+    elif command == 'change_type':
+        await user_dat.changeType()
+        await bot.send_message(user_dat.tgid,
+                               e.emojize('Протокол изменен.\nДля подключения нажмите на кнопку Как подключить :gear:'),
+                               parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat, True))
     else:
         await bot.send_message(user_dat.tgid, e.emojize('Напишите нам @vpnducks_support'), parse_mode="HTML",
@@ -718,7 +753,7 @@ async def AddTimeToUser(tgid, timetoadd):
         await switchUserActivity(str(userdat.tgid), True)
 
         await bot.send_message(userdat.tgid, e.emojize(
-            '<b>Ваш конфигурационный файл был обновлен</b>\n\nНеобходимо импортировать новый файл в приложение AmneziaVpn.\nНажмите на кнопку <b>Как подключить :gear:</b> и следуйте инструкции для вашего устройства\n\nНе забудьте удалить предыдущее соединение в Amnezia Vpn\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support'),
+            '<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support'),
                                parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
     else:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
