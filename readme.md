@@ -5,21 +5,12 @@
 
 DucksVPN is a telegram bot with AmneziaVPN server for sales vpn subscribes.
 
-- 🌍 VPN works only for YouTube, Instagram and Twitter as default
-- 🔥 Now you don't need to disable VPN, all another services will work even with VPN enabled
-- 🚀 Unlimited speed, no ads, can be installed on a smart TV or router
-- ⚡️ Operational support fron telegram bot will answer your questions and help you connect
+- 🌍 The VPN is distributed on several servers
+- 🚀 Unlimited speed, no ads
 
 ## Tech
 
-DucksVPN uses technical solutions:
-- NodeJS
-- VueJs
-- Python
-- AmneziaVPN
-- WireGuardVPN
-- WireGuard Easy
-- Docker
+DucksVPN uses Python
 
 And of course DUCKS VPN itself is open source with a public repository on GitHub.
 
@@ -35,14 +26,50 @@ ip addr show
 ```
 
 ```sh
-apt install sudo -y
 apt-get install git -y
 git clone https://github.com/milkyspace/ducksvpn.git
 cd ducksvpn
 chmod u+x install.sh
-./install.sh "{$IP}" "{$PASSWORD_TO_ADMIN_PANEL}"
+./install.sh
+
+mysql -u root -p
+  # CREATE DATABASE ducksvpn;
+  # GRANT ALL ON my_test_db.* TO 'admin'@'localhost' IDENTIFIED BY 'adminpassword' WITH GRANT OPTION;
+  # FLUSH PRIVILEGES;
+  # exit;
+
+mysql -u admin -p adminpassword
+  # use ducksvpn
+  # CREATE TABLE IF NOT EXISTS userss (   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,   tgid varchar(50) UNIQUE,   subscription text,   banned BOOLEAN DEFAULT FALSE NOT NULL,   username varchar(50),   fullname varchar(50),  referrer_id int );
+  # CREATE TABLE IF NOT EXISTS notions (   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,   tgid varchar(50) UNIQUE,   notion_type varchar(50) ,   complete BOOLEAN DEFAULT FALSE NOT NULL,  time DATETIME DEFAULT CURRENT_TIMESTAMP);
+  # CREATE TABLE IF NOT EXISTS payments (  id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,   tgid varchar(50),   bill_id text,   amount int,   time_to_add bigint,   mesid text , time DATETIME DEFAULT CURRENT_TIMESTAMP);
 ```
 
+## Setting up a vpn server (any number)
+You can use any server
+- Install https://github.com/MHSanaei/3x-ui
+- Use this https://dzen.ru/a/ZriA_y2iBCnoS7dT?ysclid=m1nfklo9j5716759728
+- Then use this https://github.com/keivanipchihagh/x-ui#-optional-safety-first
+- Then use this https://safereactor.cc/post/5761728
+- Then use this https://github.com/DigneZzZ/dwg/blob/main/tools/block_torrent.sh
+- Then use this https://github.com/keivanipchihagh/x-ui/blob/main/scripts/bbr.sh
+- Then use this https://github.com/keivanipchihagh/x-ui/blob/main/scripts/ufw.sh (with extreme caution)
+
+## Load balancing across servers
+- Buy a domain on https://njal.la/ for a crypt
+- Register on cloudflare.com
+- Move domain from njal.la to cloudflare.com
+- Get an SSL certificate for the domain
+- Register one a-record per domain for each VPN server (do not turn on the CDN Cloudflare)
+
+## DSM
+Now you have to install DSM (Ducks Server Manager)
+- https://github.com/milkyspace/ducks-server-manager
+Setting up the DSM at .env
+- Set VPN_DOMAIN_FOR_LINKS. Is the domain of previous step
+- Add vpn servers to the panel
+
+## Let's go back to setting up the telegram bot:
 Change it .env: Enter your data using the example
 ```sh
 mv .env.example .env
@@ -60,12 +87,15 @@ nano .env # or vim .env
 **PERC_12** is calc price for 12 months\
 **TG_TOKEN** is telegram bot token\
 **TG_SHOP_TOKEN** is yookassa token\
-**BASE_URL** is url for wg api (default http://0.0.0.0:51821/api) \
-**PASSWORD_TO_AMNEZIA** is password to admin panel\
-**BOT_NAME** is name of telegram bot
+**DB_HOST** is host of database
+**DB_NAME** is name of database
+**DB_USER** is user of database
+**DB_PASSWORD** is password to user of database
+**SERVER_MANAGER_URL** is url for server manager (for example DSM http://{IP}/api)
+**SERVER_MANAGER_EMAIL** is login for server manager
+**SERVER_MANAGER_PASSWORD** is password for server manager
 
-Now you can open admin panel http://{$IP}:51821/
-And start the telegram bot
+Now you can start the telegram bot
 
 ```sh
 sudo systemctl start ducksVpnTelegram
