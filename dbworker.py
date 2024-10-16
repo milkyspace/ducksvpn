@@ -1,12 +1,8 @@
-import aiosqlite
-import sqlite3
 import time
-import subprocess
-import requests
-import json
-import logging
 import os
-from dotenv import load_dotenv, dotenv_values
+import pymysql
+import pymysql.cursors
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -20,14 +16,20 @@ CONFIG = {
     "UTC_time": int(os.getenv("UTC_TIME")),
     "tg_token": os.getenv("TG_TOKEN"),
     "tg_shop_token": os.getenv("TG_SHOP_TOKEN"),
-    "base_url": os.getenv("BASE_URL"),
-    "password_to_amnezia": os.getenv("PASSWORD_TO_AMNEZIA"),
+    "server_manager_url": os.getenv("SERVER_MANAGER_URL"),
+    "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
+    "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
 }
 
-BASE_URL = CONFIG["base_url"]
-PASSWORD = CONFIG["password_to_amnezia"]
+SERVER_MANAGER_URL = CONFIG["server_manager_url"]
+SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
+SERVER_MANAGER_PASSWORD = CONFIG["server_manager_password"]
 
-DBCONNECT="data.sqlite"
+DBHOST = "localhost"
+DBUSER = "vpnducks"
+DBPASSWORD = "199612Kolva"
+DBNAME = "ducksvpn"
+
 
 class User:
     def __init__(self):
@@ -38,17 +40,20 @@ class User:
         self.registered = False
         self.username = None
         self.fullname = None
+        self.referrer_id = None
 
     @classmethod
     async def GetInfo(cls, tgid):
         self = User()
         self.tgid = tgid
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM userss where tgid=?",(tgid,))
-        log = await c.fetchone()
-        await c.close()
-        await db.close()
+
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute("SELECT * FROM userss WHERE tgid= %s ", (tgid))
+        log = dbCur.fetchone()
+        dbCur.close()
+        conn.close()
+
         if not log is None:
             self.id = log["id"]
             self.subscription = log["subscription"]
@@ -59,94 +64,113 @@ class User:
             self.referrer_id = log["referrer_id"]
         else:
             self.registered = False
-
         return self
 
     async def PaymentInfo(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM payments where tgid=?", (self.tgid,))
-        log = await c.fetchone()
-        await c.close()
-        await db.close()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM payments where tgid=%s", (self.tgid,))
+        log = dbCur.fetchone()
+        dbCur.close()
+        conn.close()
+
         return log
 
     async def CancelPayment(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        await db.execute(f"DELETE FROM payments where tgid=?",
-                         (self.tgid,))
-        await db.commit()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"DELETE FROM payments where tgid=%s",
+                      (self.tgid,))
+        conn.commit()
+        dbCur.close()
+        conn.close()
 
-    async def NewPay(self,bill_id,summ,time_to_add,mesid):
-        db = await aiosqlite.connect(DBCONNECT)
-        await db.execute(f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid) values (?,?,?,?,?)",
-                         (self.tgid, str(bill_id),summ,int(time_to_add),str(mesid)))
-        await db.commit()
+    async def NewPay(self, bill_id, summ, time_to_add, mesid):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid) values (%s,%s,%s,%s,%s)",
+                      (self.tgid, str(bill_id), summ, int(time_to_add), str(mesid)))
+        conn.commit()
+        dbCur.close()
+        conn.close()
 
     async def GetAllPaymentsInWork(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM payments")
-        log = await c.fetchall()
-        await c.close()
-        await db.close()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM payments")
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
+
         return log
 
-    async def Adduser(self, username, full_name, referrer_id):
+    async def Adduser(self, userid, username, full_name, referrer_id):
         if self.registered == False:
-            response = requests.post(f"{BASE_URL}/wireguard/client", data=json.dumps({"name": str(self.tgid)}), headers={"Content-Type": "application/json", "password": f"{PASSWORD}"})
-            if response.status_code == 200:
-                clients = requests.get(f"{BASE_URL}/wireguard/client", headers={"password": f"{PASSWORD}"})
-                for client in clients.json():
-                    if str(self.tgid) == client.get('name', 0):
-                        db = await aiosqlite.connect(DBCONNECT)
-                        await db.execute(f"INSERT INTO userss (tgid,subscription,username,fullname,wg_key,referrer_id) values (?,?,?,?,?,?)", (self.tgid,str(int(time.time())+int(CONFIG['trial_period']) * 86400),str(username),str(full_name),client.get('id', 0),referrer_id))
-                        await db.commit()
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"INSERT INTO userss (tgid,subscription,username,fullname,referrer_id) values (%s,%s,%s,%s,%s)",
+                (self.tgid, str(int(time.time()) + int(CONFIG['trial_period']) * 86400), str(username),
+                 str(full_name), referrer_id))
+            conn.commit()
+            dbCur.close()
+            conn.close()
+
             self.registered = True
 
     async def GetAllUsers(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM userss")
-        log = await c.fetchall()
-        await c.close()
-        await db.close()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM userss")
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
+
         return log
 
     async def GetAllUsersWithSub(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM userss where subscription > ?",(str(int(time.time())),))
-        log = await c.fetchall()
-        await c.close()
-        await db.close()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM userss where subscription > %s", (str(int(time.time())),))
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
         return log
 
     async def GetAllUsersWithoutSub(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        db.row_factory = sqlite3.Row
-        c = await db.execute(f"SELECT * FROM userss where banned = true")
-        log = await c.fetchall()
-        await c.close()
-        await db.close()
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM userss where banned = true")
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
+
         return log
 
-    async def CheckNewNickname(self,message):
+    async def CheckNewNickname(self, message):
         try:
             username = "@" + str(message.from_user.username)
         except:
             username = str(message.from_user.id)
 
-        if message.from_user.full_name!=self.fullname or username!=self.username:
-            db = await aiosqlite.connect(DBCONNECT)
-            db.row_factory = sqlite3.Row
-            await db.execute(f"Update userss set username = ?, fullname = ? where id = ?", (username,message.from_user.full_name,self.id))
-            await db.commit()
+        if message.from_user.full_name != self.fullname or username != self.username:
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"Update userss set username = %s, fullname = %s where id = %s",
+                          (username, message.from_user.full_name, self.id))
+            conn.commit()
+            dbCur.close()
+            conn.close()
 
     async def countReferrerByUser(self):
-        db = await aiosqlite.connect(DBCONNECT)
-        c = await db.execute(f"select count(*) as count from userss where referrer_id=?",
-                         (self.tgid,))
-        log = await c.fetchone()
-        await db.commit()
-        return 0 if log[0] is None else log[0]
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"select count(*) as count from userss where referrer_id=%s",
+                      (self.tgid,))
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
+
+        print()
+
+        return 0 if log[0] is None else log[0]['count']
