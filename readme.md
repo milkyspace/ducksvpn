@@ -1,7 +1,7 @@
 # 🦆 DUCKS VPN
 ## _The Best Telegram Vpn Service, Ever_
 
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/vpnducks_support)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightblue.svg)](https://opensource.org/licenses/MIT)
 
 DucksVPN is a system for VPN:
 - Telegram bot for sales vpn subscribes
@@ -11,20 +11,16 @@ DucksVPN is a system for VPN:
 
 Technically, the system now looks like this
 
-![screenshot](readme.png)
+![system](system.png)
 
 And of course DUCKS VPN itself is open source with a public repository on GitHub.
 
 ## Installation
 
-DUCKS VPN requires Docker and Python3 to run.\
+DUCKS VPN requires Python3 to run.\
 You must create a bot in telegram via https://t.me/BotFather and create a store in YooKassa https://yookassa.ru/ to receive subscription payments
 
 Install the dependencies and start the server.
-You need to find out your ip address ($IP):
-```sh
-ip addr show
-```
 
 ```sh
 apt-get install git -y
@@ -70,6 +66,11 @@ Setting up the DSM at .env
 - Set VPN_DOMAIN_FOR_LINKS. Is the domain of previous step
 - Add vpn servers to the panel
 
+You need to find out your ip address ($IP):
+```sh
+ip addr show
+```
+
 ## Let's go back to setting up the telegram bot:
 Change it .env: Enter your data using the example
 ```sh
@@ -106,6 +107,26 @@ sudo systemctl status ducksVpnTelegram
 
 ## License
 
-MIT
+MIT License
+
+Copyright (c) 2024 milkyspace
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 **Free Software**
