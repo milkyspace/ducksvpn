@@ -8,10 +8,10 @@ SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
 SERVER_MANAGER_PASSWORD = CONFIG["server_manager_password"]
 
-DBHOST = "localhost"
-DBUSER = "vpnducks"
-DBPASSWORD = "199612Kolva"
-DBNAME = "ducksvpn"
+DBHOST = CONFIG["db_host"]
+DBUSER = CONFIG["db_name"]
+DBPASSWORD = CONFIG["db_user"]
+DBNAME = CONFIG["db_password"]
 
 
 class User:
