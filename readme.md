@@ -3,14 +3,14 @@
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/vpnducks_support)
 
-DucksVPN is a telegram bot with AmneziaVPN server for sales vpn subscribes.
-
-- 🌍 The VPN is distributed on several servers
-- 🚀 Unlimited speed, no ads
+DucksVPN is a system for VPN:
+- Telegram bot for sales vpn subscribes
+- DSM (Ducks Server Manager) https://github.com/milkyspace/ducks-server-manager
 
 ## Tech
 
-DucksVPN uses Python
+Technically, the system now looks like this
+![screenshot](readme.png)
 
 And of course DUCKS VPN itself is open source with a public repository on GitHub.
 
