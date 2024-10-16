@@ -17,7 +17,7 @@ And of course DUCKS VPN itself is open source with a public repository on GitHub
 
 ## Installation
 
-DUCKS VPN requires Docker and Python3 to run.\
+DUCKS VPN requires Python3 to run.\
 You must create a bot in telegram via https://t.me/BotFather and create a store in YooKassa https://yookassa.ru/ to receive subscription payments
 
 Install the dependencies and start the server.
