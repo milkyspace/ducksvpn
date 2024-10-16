@@ -10,6 +10,7 @@ DucksVPN is a system for VPN:
 ## Tech
 
 Technically, the system now looks like this
+
 ![screenshot](readme.png)
 
 And of course DUCKS VPN itself is open source with a public repository on GitHub.
