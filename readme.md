@@ -21,10 +21,6 @@ DUCKS VPN requires Python3 to run.\
 You must create a bot in telegram via https://t.me/BotFather and create a store in YooKassa https://yookassa.ru/ to receive subscription payments
 
 Install the dependencies and start the server.
-You need to find out your ip address ($IP):
-```sh
-ip addr show
-```
 
 ```sh
 apt-get install git -y
@@ -69,6 +65,11 @@ Now you have to install DSM (Ducks Server Manager)
 Setting up the DSM at .env
 - Set VPN_DOMAIN_FOR_LINKS. Is the domain of previous step
 - Add vpn servers to the panel
+
+You need to find out your ip address ($IP):
+```sh
+ip addr show
+```
 
 ## Let's go back to setting up the telegram bot:
 Change it .env: Enter your data using the example
