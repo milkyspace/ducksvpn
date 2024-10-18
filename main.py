@@ -863,6 +863,7 @@ bot.add_custom_filter(asyncio_filters.StateFilter(bot))
 
 
 def checkTime():
+    global e
     while True:
         try:
             time.sleep(15)
@@ -918,7 +919,7 @@ def checkTime():
                     if log is None:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                        dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
+                        dbCur.execute(f"INSERT INTO notions (tgid,notion_type,complete) values (%s,%s,true)",
                                       (i['tgid'], 'type_2hours',))
                         conn.commit()
                         dbCur.close()
@@ -934,8 +935,8 @@ def checkTime():
                                                  reply_markup=Butt_reffer,
                                                  parse_mode="HTML")
 
-        except ApiTelegramException as e:
-            if e.description == "Forbidden: bot was blocked by the user":
+        except ApiTelegramException as exception:
+            if exception.description == "Forbidden: bot was blocked by the user":
                 print("Attention please! The user {} has blocked the bot. I can't send anything to them")
         except Exception as err:
             print('NOT AWAIT ERROR')
