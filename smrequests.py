@@ -75,7 +75,6 @@ async def addUser(userid, username):
     if response:
         return True
 
-    print(response.content)
     return False
 
 

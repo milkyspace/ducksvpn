@@ -195,15 +195,15 @@ class User:
             return False
 
         newType = 'xui'
-        if log['type'] is None or log['type'] == 'xui':
-            newType = 'amnezia'
-        elif log['type'] == 'amnezia':
+        if log['type'] is None or log['type'] == 'amnezia':
             newType = 'xui'
+        elif log['type'] == 'xui':
+            newType = 'amnezia'
 
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"Update userss set type = %s where id = %s",
-                      (newType, self.id))
+        dbCur.execute(f"Update userss set type = %s where tgid = %s",
+                      (newType, self.tgid))
         conn.commit()
         dbCur.close()
         conn.close()
