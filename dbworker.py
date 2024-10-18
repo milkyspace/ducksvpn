@@ -50,6 +50,7 @@ class User:
         self.fullname = None
         self.referrer_id = None
         self.type = None
+        self.blocked = None
 
     @classmethod
     async def GetInfo(cls, tgid):
@@ -72,6 +73,7 @@ class User:
             self.fullname = log["fullname"]
             self.referrer_id = log["referrer_id"]
             self.type = log["type"]
+            self.blocked = log["blocked"]
         else:
             self.registered = False
         return self

@@ -875,100 +875,112 @@ def checkTime():
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM userss")
+            dbCur.execute(f"SELECT * FROM userss WHERE blocked=false")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
 
             for i in log:
-                time_now = int(time.time())
-                remained_time = int(i['subscription']) - time_now
-                if remained_time <= 0 and i['banned'] == False:
-                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                    dbCur.execute(f"UPDATE userss SET banned=true where tgid=%s", (i['tgid'],))
-                    conn.commit()
-                    dbCur.close()
-                    conn.close()
-
-                    asyncio.run(switchUserActivity(str(i['tgid']), False))
-
-                    dateto = datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime(
-                        '%d.%m.%Y %H:%M')
-                    Butt_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                    Butt_main.add(types.KeyboardButton(e.emojize(f":red_circle: Подписка закончилась: {dateto} МСК")))
-                    Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),
-                                  types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
-                    Butt_main.add(
-                        types.KeyboardButton(e.emojize(f"Почему стоит выбрать нас? :smiling_face_with_sunglasses:")),
-                        types.KeyboardButton(e.emojize(f"Пригласить :woman_and_man_holding_hands:")),
-                        types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
-                    if i['tgid'] in CONFIG["admin_tg_id"]:
-                        Butt_main.add(types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
-
-                    BotChecking = TeleBot(BOTAPIKEY)
-                    BotChecking.send_message(i['tgid'],
-                                             texts_for_bot["ended_sub_message"],
-                                             reply_markup=Butt_main, parse_mode="HTML")
-
-                elif remained_time > 0 and remained_time <= 7200:
-                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                    dbCur.execute(
-                        f"SELECT * FROM notions where tgid=%s and notion_type='type_2hours' and complete=false",
-                        (i['tgid'],))
-                    log = dbCur.fetchone()
-                    dbCur.close()
-                    conn.close()
-
-                    if log is None:
+                try:
+                    time_now = int(time.time())
+                    remained_time = int(i['subscription']) - time_now
+                    if remained_time <= 0 and i['banned'] == False:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                        dbCur.execute(f"INSERT INTO notions (tgid,notion_type,complete) values (%s,%s,true)",
-                                      (i['tgid'], 'type_2hours',))
+                        dbCur.execute(f"UPDATE userss SET banned=true where tgid=%s", (i['tgid'],))
                         conn.commit()
                         dbCur.close()
                         conn.close()
 
-                        Butt_reffer = types.InlineKeyboardMarkup()
-                        Butt_reffer.add(
-                            types.InlineKeyboardButton(
-                                e.emojize(f"Продлить подписку :money_bag:"),
-                                callback_data="PayBlock"))
+                        asyncio.run(switchUserActivity(str(i['tgid']), False))
+
+                        dateto = datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime(
+                            '%d.%m.%Y %H:%M')
+                        Butt_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                        Butt_main.add(
+                            types.KeyboardButton(e.emojize(f":red_circle: Подписка закончилась: {dateto} МСК")))
+                        Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),
+                                      types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
+                        Butt_main.add(
+                            types.KeyboardButton(
+                                e.emojize(f"Почему стоит выбрать нас? :smiling_face_with_sunglasses:")),
+                            types.KeyboardButton(e.emojize(f"Пригласить :woman_and_man_holding_hands:")),
+                            types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
+                        if i['tgid'] in CONFIG["admin_tg_id"]:
+                            Butt_main.add(
+                                types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
+
                         BotChecking = TeleBot(BOTAPIKEY)
-                        BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
-                                                 reply_markup=Butt_reffer,
-                                                 parse_mode="HTML")
+                        BotChecking.send_message(i['tgid'],
+                                                 texts_for_bot["ended_sub_message"],
+                                                 reply_markup=Butt_main, parse_mode="HTML")
 
-                elif remained_time > 7200 and remained_time <= 86400:
-                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                    dbCur.execute(
-                        f"SELECT * FROM notions where tgid=%s and notion_type='type_24hours' and complete=false",
-                        (i['tgid'],))
-                    log = dbCur.fetchone()
-                    dbCur.close()
-                    conn.close()
-
-                    if log is None:
+                    elif remained_time > 0 and remained_time <= 7200:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                        dbCur.execute(f"INSERT INTO notions (tgid,notion_type,complete) values (%s,%s,true)",
-                                      (i['tgid'], 'type_24hours',))
-                        conn.commit()
+                        dbCur.execute(
+                            f"SELECT * FROM notions where tgid=%s and notion_type='type_2hours' and complete=false",
+                            (i['tgid'],))
+                        log = dbCur.fetchone()
                         dbCur.close()
                         conn.close()
 
-                        Butt_reffer = types.InlineKeyboardMarkup()
-                        Butt_reffer.add(
-                            types.InlineKeyboardButton(
-                                e.emojize(f"Продлить подписку :money_bag:"),
-                                callback_data="PayBlock"))
-                        BotChecking = TeleBot(BOTAPIKEY)
-                        BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
-                                                 reply_markup=Butt_reffer,
-                                                 parse_mode="HTML")
+                        if log is None:
+                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type,complete) values (%s,%s,true)",
+                                          (i['tgid'], 'type_2hours',))
+                            conn.commit()
+                            dbCur.close()
+                            conn.close()
 
+                            Butt_reffer = types.InlineKeyboardMarkup()
+                            Butt_reffer.add(
+                                types.InlineKeyboardButton(
+                                    e.emojize(f"Продлить подписку :money_bag:"),
+                                    callback_data="PayBlock"))
+                            BotChecking = TeleBot(BOTAPIKEY)
+                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
+                                                     reply_markup=Butt_reffer,
+                                                     parse_mode="HTML")
+
+                    elif remained_time > 7200 and remained_time <= 86400:
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(
+                            f"SELECT * FROM notions where tgid=%s and notion_type='type_24hours' and complete=false",
+                            (i['tgid'],))
+                        log = dbCur.fetchone()
+                        dbCur.close()
+                        conn.close()
+
+                        if log is None:
+                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type,complete) values (%s,%s,true)",
+                                          (i['tgid'], 'type_24hours',))
+                            conn.commit()
+                            dbCur.close()
+                            conn.close()
+
+                            Butt_reffer = types.InlineKeyboardMarkup()
+                            Butt_reffer.add(
+                                types.InlineKeyboardButton(
+                                    e.emojize(f"Продлить подписку :money_bag:"),
+                                    callback_data="PayBlock"))
+                            BotChecking = TeleBot(BOTAPIKEY)
+                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
+                                                     reply_markup=Butt_reffer,
+                                                     parse_mode="HTML")
+                except ApiTelegramException as exception:
+                    if (exception.description == 'Forbidden: bot was blocked by the user'):
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(f"Update userss set blocked=true where tgid=%s", (i['tgid']))
+                        conn.commit()
+                        dbCur.close()
+                        conn.close()
+                    pass
         except ApiTelegramException as exception:
             print("ApiTelegramException")
             print(exception.description)
