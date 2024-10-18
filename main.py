@@ -970,8 +970,9 @@ def checkTime():
                                                  parse_mode="HTML")
 
         except ApiTelegramException as exception:
-            if exception.description == "Forbidden: bot was blocked by the user":
-                print("Attention please! The user {} has blocked the bot. I can't send anything to them")
+            print("ApiTelegramException")
+            print(exception.description)
+            pass
         except Exception as err:
             print('NOT AWAIT ERROR')
             print(err)
