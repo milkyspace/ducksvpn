@@ -144,7 +144,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
 
             instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href='https://apps.apple.com/ru/app/amneziavpn/id1600529900'>AmneziaVPN из AppStore</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение Amnezia VPN, внутри приложения нажмите на кнопку \"Вставить\" (или \"Insert\") \n\r3. Приложение попросит разрешения на вставку, дайте разрешения нажмите \"Продолжить\"\n\r4. Нажмите на кнопку \"Подключиться\" и включите VPN большой круглой кнопкой.\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение <a href='https://play.google.com/store/apps/details/v2rayNG?id=com.v2ray.ang'>v2rayNG из Google Play</a>. Если у вас нет Google Play, напишите @vpnducks_support и мы отправим файл для установки приложения\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение v2rayNG, внутри приложения нажмите кнопку ➕, находящуюся вверху справа, затем \"Импорт из буфера обмена\"\n\r3. Нажмите на кнопку ▶️ внизу справа и выдайте приложению требуемые разрешения\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
-            instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите <a href='https://github.com/hiddify/hiddify-next/releases/download/v2.5.7/Hiddify-Windows-Setup-x64.Msix'>Hiddify</a> для Windows</a> или <a href='https://apps.apple.com/ru/app/foxray/id6448898396'>FoXray</a> для MacOS</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение, внутри приложения импортируйте строку\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите <a href='https://github.com/hiddify/hiddify-next/releases/download/v2.5.7/Hiddify-Windows-Setup-x64.Msix'>Hiddify для Windows</a> или <a href='https://apps.apple.com/ru/app/foxray/id6448898396'>FoXray для MacOS</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение, внутри приложения импортируйте строку\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             if (device == "iPhone"):
                 await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionIPhone), parse_mode="HTML",
                                        disable_web_page_preview=True,
@@ -158,7 +158,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
 
-            await bot.send_message(chat_id=user_dat.tgid, text=f"`{link}`", parse_mode="Markdown",
+            await bot.send_message(chat_id=user_dat.tgid, text=f"<blockquote>{link}</blockquote>", parse_mode="HTML",
                                    reply_markup=await main_buttons(user_dat, True))
         else:
             await bot.send_message(user_dat.tgid,
@@ -927,8 +927,7 @@ def checkTime():
                         Butt_reffer = types.InlineKeyboardMarkup()
                         Butt_reffer.add(
                             types.InlineKeyboardButton(
-                                e.emojize(
-                                    f"Бесплатно +{CONFIG['count_free_from_referrer']} месяц за нового друга, оплатившего подписку"),
+                                f"Бесплатно +{CONFIG['count_free_from_referrer']} месяц за нового друга, оплатившего подписку",
                                 callback_data="Referrer"))
                         BotChecking = TeleBot(BOTAPIKEY)
                         BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub"],
