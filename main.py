@@ -940,7 +940,7 @@ def checkTime():
                                                  reply_markup=Butt_reffer,
                                                  parse_mode="HTML")
 
-                elif remained_time > 0 and remained_time <= 86400:
+                elif remained_time > 7200 and remained_time <= 86400:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                     dbCur = conn.cursor(pymysql.cursors.DictCursor)
                     dbCur.execute(
