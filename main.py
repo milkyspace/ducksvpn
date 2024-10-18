@@ -704,7 +704,7 @@ async def Init(call: types.CallbackQuery):
     elif command == 'change_type':
         isTypeChanged = await user_dat.changeType()
         if isTypeChanged:
-            await addUser(m.chat.id, username)
+            await addUser(user_dat.tgid, user_dat.username)
             await bot.send_message(user_dat.tgid,
                                    e.emojize(
                                        'Протокол изменен.\nДля подключения нажмите на кнопку Как подключить :gear:'),
