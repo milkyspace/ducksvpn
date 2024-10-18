@@ -915,6 +915,63 @@ def checkTime():
                                                  texts_for_bot["ended_sub_message"],
                                                  reply_markup=Butt_main, parse_mode="HTML")
 
+                    elif remained_time > 0 and remained_time <= 7200:
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(
+                            f"SELECT * FROM notions where tgid=%s and notion_type='type_2hours'",
+                            (i['tgid'],))
+                        log = dbCur.fetchone()
+                        dbCur.close()
+                        conn.close()
+
+                        if log is None:
+                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
+                                          (i['tgid'], 'type_2hours',))
+                            conn.commit()
+                            dbCur.close()
+                            conn.close()
+
+                            Butt_reffer = types.InlineKeyboardMarkup()
+                            Butt_reffer.add(
+                                types.InlineKeyboardButton(
+                                    e.emojize(f"Продлить подписку :money_bag:"),
+                                    callback_data="PayBlock"))
+                            BotChecking = TeleBot(BOTAPIKEY)
+                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
+                                                     reply_markup=Butt_reffer,
+                                                     parse_mode="HTML")
+
+                    elif remained_time > 7200 and remained_time <= 86400:
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(
+                            f"SELECT * FROM notions where tgid=%s and notion_type='type_24hours'",
+                            (i['tgid'],))
+                        log = dbCur.fetchone()
+                        dbCur.close()
+                        conn.close()
+
+                        if log is None:
+                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
+                                          (i['tgid'], 'type_24hours',))
+                            conn.commit()
+                            dbCur.close()
+                            conn.close()
+
+                            Butt_reffer = types.InlineKeyboardMarkup()
+                            Butt_reffer.add(
+                                types.InlineKeyboardButton(
+                                    e.emojize(f"Продлить подписку :money_bag:"),
+                                    callback_data="PayBlock"))
+                            BotChecking = TeleBot(BOTAPIKEY)
+                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
+                                                     reply_markup=Butt_reffer,
+                                                     parse_mode="HTML")
                 except ApiTelegramException as exception:
                     if (exception.description == 'Forbidden: bot was blocked by the user'):
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
