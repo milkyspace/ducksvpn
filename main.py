@@ -911,7 +911,7 @@ def checkTime():
                                              texts_for_bot["ended_sub_message"],
                                              reply_markup=Butt_main, parse_mode="HTML")
 
-                if remained_time <= 7200:
+                elif remained_time > 0 and remained_time <= 7200:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                     dbCur = conn.cursor(pymysql.cursors.DictCursor)
                     dbCur.execute(
@@ -940,7 +940,7 @@ def checkTime():
                                                  reply_markup=Butt_reffer,
                                                  parse_mode="HTML")
 
-                if remained_time <= 86400:
+                elif remained_time > 0 and remained_time <= 86400:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                     dbCur = conn.cursor(pymysql.cursors.DictCursor)
                     dbCur.execute(
