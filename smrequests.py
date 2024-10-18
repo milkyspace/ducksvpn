@@ -67,7 +67,7 @@ async def addUser(userid, username):
                  "Content-Type": "application/json",
                  "Authorization": token},
         data=json.dumps({
-            "tg_id": str(userid),
+            "id": str(userid),
             "name": str(username),
             "limit_ip": 3
         }))
