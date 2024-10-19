@@ -73,6 +73,7 @@ class MyStates(StatesGroup):
     findUserViaId = State()
     prepareUserForSendMessage = State()
     sendMessageToUser = State()
+    sendMessageToAllUser = State()
     sendMessageToAllInactiveUser = State()
     editUser = State()
     editUserResetTime = State()
@@ -497,6 +498,34 @@ async def Work_with_Message(m: types.Message):
     await bot.send_message(m.from_user.id, "Сообщение отправлено", reply_markup=await buttons.admin_buttons())
 
 
+@bot.message_handler(state=MyStates.sendMessageToAllUser, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    user_dat = await User.GetInfo(m.from_user.id)
+    allusers = await user_dat.GetAllUsers()
+
+    readymass = []
+    readymes = ""
+    for i in allusers:
+        await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+        if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
+            readymass.append(readymes)
+            readymes = ""
+        readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
+
+    readymass.append(readymes)
+    for i in readymass:
+        await bot.send_message(m.from_user.id, e.emojize(i), reply_markup=await buttons.admin_buttons(),
+                               parse_mode="HTML")
+
+    await bot.delete_state(m.from_user.id)
+    await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+    return
+
 @bot.message_handler(state=MyStates.sendMessageToAllInactiveUser, content_types=["text"])
 async def Work_with_Message(m: types.Message):
     if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
@@ -624,6 +653,12 @@ async def Work_with_Message(m: types.Message):
             await bot.send_message(m.from_user.id, "Введите Telegram Id пользователя:",
                                    reply_markup=types.ReplyKeyboardRemove())
             await bot.set_state(m.from_user.id, MyStates.prepareUserForSendMessage)
+            return
+
+        if e.demojize(m.text) == "Отправить сообщение всем пользователям :pencil:":
+            await bot.set_state(m.from_user.id, MyStates.sendMessageToAllUser)
+            await bot.send_message(m.from_user.id, "Введите сообщение:",
+                                   reply_markup=await buttons.admin_buttons_back())
             return
 
         if e.demojize(m.text) == "Отправить сообщение всем неактивным пользователям :pencil:":
