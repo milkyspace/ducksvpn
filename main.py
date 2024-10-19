@@ -511,11 +511,12 @@ async def Work_with_Message(m: types.Message):
     readymass = []
     readymes = ""
     for i in allusers:
-        await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
-        if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
-            readymass.append(readymes)
-            readymes = ""
-        readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
+        if i['banned'] == False:
+            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+            if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
+                readymass.append(readymes)
+                readymes = ""
+            readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
 
     readymass.append(readymes)
     for i in readymass:
@@ -525,6 +526,7 @@ async def Work_with_Message(m: types.Message):
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
     return
+
 
 @bot.message_handler(state=MyStates.sendMessageToAllInactiveUser, content_types=["text"])
 async def Work_with_Message(m: types.Message):
