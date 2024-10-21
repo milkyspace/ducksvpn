@@ -144,7 +144,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             data = connectionLinks['data']
             link = data['link']
 
-            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href='https://apps.apple.com/ru/app/amneziavpn/id1600529900'>AmneziaVPN из AppStore</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в приложение Amnezia VPN, внутри приложения перейдите во вкладку «Соединение» (нажав на +), далее нажмите на кнопку \"Вставить\" \n\r3. Приложение попросит разрешения на вставку, дайте разрешения нажмите \"Продолжить\"\n\r4. Нажмите на кнопку \"Подключиться\" и включите VPN большой круглой кнопкой.\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
+            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href='https://apps.apple.com/ru/app/amneziavpn/id1600529900'>AmneziaVPN из AppStore</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в приложение Amnezia VPN, внутри приложения перейдите во вкладку «Соединение» (нажав на +), далее нажмите на кнопку \"Вставить\" \n\r3. Приложение попросит разрешения на вставку, дайте разрешения и нажмите \"Продолжить\"\n\r4. Нажмите на кнопку \"Подключиться\" и включите VPN большой круглой кнопкой.\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение <a href='https://play.google.com/store/apps/details/v2rayNG?id=com.v2ray.ang'>v2rayNG из Google Play</a>. Если у вас нет Google Play, напишите @vpnducks_support и мы отправим файл для установки приложения\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение v2rayNG, внутри приложения нажмите кнопку ➕, находящуюся вверху справа, затем \"Импорт из буфера обмена\"\n\r3. Нажмите на кнопку ▶️ внизу справа и выдайте приложению требуемые разрешения\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionPC = f"<b>Подключение VPN DUCKS на PC (Windows, MacOS)</b>\n\r\n\r1. Установите <a href='https://github.com/hiddify/hiddify-next/releases/download/v2.5.7/Hiddify-Windows-Setup-x64.Msix'>Hiddify для Windows</a> или <a href='https://apps.apple.com/ru/app/foxray/id6448898396'>FoXray для MacOS</a>\n\r2. Скопируйте ссылку, прикрепленную ниже, перейдите в установленное в первом пункте приложение, внутри приложения импортируйте строку\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             if (device == "iPhone"):
@@ -509,20 +509,14 @@ async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.from_user.id)
     allusers = await user_dat.GetAllUsers()
 
-    readymass = []
-    readymes = ""
     for i in allusers:
         if i['banned'] == False:
-            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
-            if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
-                readymass.append(readymes)
-                readymes = ""
-            readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
-
-    readymass.append(readymes)
-    for i in readymass:
-        await bot.send_message(m.from_user.id, e.emojize(i), reply_markup=await buttons.admin_buttons(),
-                               parse_mode="HTML")
+            try:
+                await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+            except ApiTelegramException as exception:
+                print("sendMessageToAllUser")
+                print(exception.description)
+                pass
 
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
@@ -544,13 +538,8 @@ async def Work_with_Message(m: types.Message):
             try:
                 await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
             except ApiTelegramException as exception:
-                print("ApiTelegramException")
+                print("sendMessageToAmneziaUser")
                 print(exception.description)
-                pass
-            except Exception as err:
-                print('NOT AWAIT ERROR')
-                print(err)
-                print(traceback.format_exc())
                 pass
 
     await bot.delete_state(m.from_user.id)
@@ -568,19 +557,13 @@ async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.from_user.id)
     allusers = await user_dat.GetAllUsersWithoutSub()
 
-    readymass = []
-    readymes = ""
     for i in allusers:
-        await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
-        if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
-            readymass.append(readymes)
-            readymes = ""
-        readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
-
-    readymass.append(readymes)
-    for i in readymass:
-        await bot.send_message(m.from_user.id, e.emojize(i), reply_markup=await buttons.admin_buttons(),
-                               parse_mode="HTML")
+        try:
+            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+        except ApiTelegramException as exception:
+            print("sendMessageToAllInactiveUser")
+            print(exception.description)
+            pass
 
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
