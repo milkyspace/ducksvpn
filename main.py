@@ -784,7 +784,7 @@ async def Work_with_Message(m: types.Message):
 async def Init(call: types.CallbackQuery):
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
-    await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Запрос отправлен. Ваш ключ генерируется :winking_face:"), parse_mode="HTML")
+    await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Запрос отправлен. Пожалуйста, подождите, ваш ключ генерируется :winking_face:"), parse_mode="HTML")
     await addUser(user_dat.tgid, user_dat.username)
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await bot.answer_callback_query(call.id)
