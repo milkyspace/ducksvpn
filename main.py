@@ -587,8 +587,8 @@ async def Work_with_Message(m: types.Message):
                                        reply_markup=await buttons.admin_buttons())
                 await bot.send_message(m.from_user.id, f"{i['tgid']}", parse_mode="HTML")
                 await bot.send_message(m.from_user.id, f"{i['username']}", parse_mode="HTML")
-                await bot.send_message(m.from_user.id, f"{i['fullname']}", parse_mode="HTML")
-                await bot.send_message(m.from_user.id, f"{datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"Полное имя: {i['fullname']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"Подписка до: {datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}", parse_mode="HTML")
                 await bot.delete_state(m.from_user.id)
                 return
             except ApiTelegramException as exception:
