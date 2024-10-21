@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CONFIG = {
-    "admin_tg_id": [int(os.getenv("ADMIN_TG_ID_1")), int(os.getenv("ADMIN_TG_ID_2"))],
+    "admin_tg_id": [int(os.getenv("ADMIN_TG_ID_1")), int(os.getenv("ADMIN_TG_ID_2")), int(os.getenv("ADMIN_TG_ID_3"))],
     "one_month_cost": float(os.getenv("ONE_MONTH_COST")),
     "trial_period": os.getenv("TRIAL_PERIOD"),
     "perc_1": float(os.getenv("PERC_1")),
