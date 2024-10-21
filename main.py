@@ -541,7 +541,17 @@ async def Work_with_Message(m: types.Message):
 
     for i in allusers:
         if i['banned'] == False and i['type'] == 'amnezia':
-            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+            try:
+                await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
+            except ApiTelegramException as exception:
+                print("ApiTelegramException")
+                print(exception.description)
+                pass
+            except Exception as err:
+                print('NOT AWAIT ERROR')
+                print(err)
+                print(traceback.format_exc())
+                pass
 
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
