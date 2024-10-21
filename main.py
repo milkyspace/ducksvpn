@@ -596,7 +596,7 @@ async def Work_with_Message(m: types.Message):
                 print(exception.description)
                 pass
 
-    await bot.send_message(m.from_user.id, "Пользователь не найден:",
+    await bot.send_message(m.from_user.id, "Пользователь не найден",
                            reply_markup=await buttons.admin_buttons())
     await bot.delete_state(m.from_user.id)
     return
