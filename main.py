@@ -970,7 +970,7 @@ def checkTime():
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM userss WHERE blocked=false")
+            dbCur.execute(f"SELECT * FROM userss")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
