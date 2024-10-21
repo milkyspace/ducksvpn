@@ -540,7 +540,7 @@ async def Work_with_Message(m: types.Message):
     allusers = await user_dat.GetAllUsers()
 
     for i in allusers:
-        if i['banned'] == False and i['tgid'] == '187433643':
+        if i['banned'] == False and i['type'] == 'amnezia':
             await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
 
     await bot.delete_state(m.from_user.id)
