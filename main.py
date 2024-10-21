@@ -798,6 +798,8 @@ async def Init(call: types.CallbackQuery):
         await bot.send_message(user_dat.tgid, e.emojize('Информация о подписке обновлена'), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat, True))
     elif command == 'change_type':
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
+            f"Запрос отправлен. Пожалуйста, дождитесь сообщения о смене протокола :winking_face:"), parse_mode="HTML")
         isTypeChanged = await user_dat.changeType()
         if isTypeChanged:
             await addUser(user_dat.tgid, user_dat.username)
