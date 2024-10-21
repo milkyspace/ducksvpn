@@ -720,7 +720,7 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
-        if e.demojize(m.text) == "Поиск пользователя по никнейму :find:":
+        if e.demojize(m.text) == "Поиск пользователя по никнейму :magnifying_glass_tilted_left:":
             await bot.set_state(m.from_user.id, MyStates.findUsersByName)
             await bot.send_message(m.from_user.id, "Введите никнейм пользователя:",
                                    reply_markup=await buttons.admin_buttons_back())
