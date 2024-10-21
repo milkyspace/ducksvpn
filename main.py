@@ -539,20 +539,9 @@ async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.from_user.id)
     allusers = await user_dat.GetAllUsers()
 
-    readymass = []
-    readymes = ""
     for i in allusers:
-        if i['banned'] == False and i['type'] == 'amnezia':
+        if i['banned'] == False and i['tgid'] == '187433643':
             await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML")
-            if len(readymes) + len(f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n") > 4090:
-                readymass.append(readymes)
-                readymes = ""
-            readymes += f"{i['fullname']} ({i['username']}|<code>{str(i['tgid'])}</code>)\n"
-
-    readymass.append(readymes)
-    for i in readymass:
-        await bot.send_message(m.from_user.id, e.emojize(i), reply_markup=await buttons.admin_buttons(),
-                               parse_mode="HTML")
 
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
