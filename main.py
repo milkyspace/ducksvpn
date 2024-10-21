@@ -190,7 +190,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                         visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
         else:
             await bot.send_message(user_dat.tgid,
-                                   f"Вы не подключены к нашему впн.\n\rЗа помощью обратитесь к @vpnducks_support",
+                                   f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к @vpnducks_support",
                                    reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
 
 
