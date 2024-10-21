@@ -76,6 +76,7 @@ class MyStates(StatesGroup):
     sendMessageToAllUser = State()
     sendMessageToAmneziaUser = State()
     sendMessageToAllInactiveUser = State()
+    findUsersByName = State()
     editUser = State()
     editUserResetTime = State()
 
@@ -570,6 +571,37 @@ async def Work_with_Message(m: types.Message):
     return
 
 
+@bot.message_handler(state=MyStates.findUsersByName, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    user_dat = await User.GetInfo(m.from_user.id)
+    allusers = await user_dat.GetAllUsers()
+    for i in allusers:
+        if i['username'] == m.text or i['username'] == '@' + m.text:
+            try:
+                await bot.send_message(m.from_user.id, "Пользователь найден:",
+                                       reply_markup=await buttons.admin_buttons())
+                await bot.send_message(m.from_user.id, f"{i['tgid']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"{i['username']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"{i['fullname']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"{datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}", parse_mode="HTML")
+                await bot.delete_state(m.from_user.id)
+                return
+            except ApiTelegramException as exception:
+                print("sendMessageToAllInactiveUser")
+                print(exception.description)
+                pass
+
+    await bot.send_message(m.from_user.id, "Пользователь не найден:",
+                           reply_markup=await buttons.admin_buttons())
+    await bot.delete_state(m.from_user.id)
+    return
+
+
 @bot.message_handler(state="*", content_types=["text"])
 async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.chat.id)
@@ -685,6 +717,12 @@ async def Work_with_Message(m: types.Message):
         if e.demojize(m.text) == "Отправить сообщение всем неактивным пользователям :pencil:":
             await bot.set_state(m.from_user.id, MyStates.sendMessageToAllInactiveUser)
             await bot.send_message(m.from_user.id, "Введите сообщение:",
+                                   reply_markup=await buttons.admin_buttons_back())
+            return
+
+        if e.demojize(m.text) == "Поиск пользователя по никнейму :find:":
+            await bot.set_state(m.from_user.id, MyStates.findUsersByName)
+            await bot.send_message(m.from_user.id, "Введите никнейм пользователя:",
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
