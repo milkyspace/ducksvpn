@@ -258,9 +258,18 @@ async def start(message: types.Message):
             if referrer_id and referrer_id != user_dat.tgid:
                 # Пользователь пришел по реферальной ссылке, обрабатываем это
                 referrerUser = await User.GetInfo(referrer_id)
+
+                comingUserInfo = message.from_user.full_name
+                if str(message.from_user.username) is not 'None':
+                    comingUserInfo = comingUserInfo + '(' + username + ')'
+
                 await bot.send_message(referrer_id,
-                                       f"По вашей ссылке пришел новый пользователь\nВы получите +1 месяц бесплатного доступа, если он оплатит подписку",
+                                       f"По вашей ссылке пришел новый пользователь: {comingUserInfo}\nВы получите +1 месяц бесплатного доступа, если он оплатит подписку",
                                        reply_markup=await main_buttons(referrerUser))
+
+                for admin in CONFIG["admin_tg_id"]:
+                    await bot.send_message(admin,
+                                           f"По ссылке от пользователя {referrer_id} пришел новый пользователь: {comingUserInfo}")
 
             # Приветствуем нового пользователя (реферала)
             user_dat = await User.GetInfo(message.chat.id)
@@ -588,7 +597,9 @@ async def Work_with_Message(m: types.Message):
                 await bot.send_message(m.from_user.id, f"{i['tgid']}", parse_mode="HTML")
                 await bot.send_message(m.from_user.id, f"{i['username']}", parse_mode="HTML")
                 await bot.send_message(m.from_user.id, f"Полное имя: {i['fullname']}", parse_mode="HTML")
-                await bot.send_message(m.from_user.id, f"Подписка до: {datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id,
+                                       f"Подписка до: {datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}",
+                                       parse_mode="HTML")
                 await bot.delete_state(m.from_user.id)
                 return
             except ApiTelegramException as exception:
@@ -784,7 +795,8 @@ async def Work_with_Message(m: types.Message):
 async def Init(call: types.CallbackQuery):
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
-    await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Запрос отправлен. Пожалуйста, подождите, ваш ключ генерируется :winking_face:"), parse_mode="HTML")
+    await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
+        f"Запрос отправлен. Пожалуйста, подождите, ваш ключ генерируется :winking_face:"), parse_mode="HTML")
     await addUser(user_dat.tgid, user_dat.username)
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await bot.answer_callback_query(call.id)
