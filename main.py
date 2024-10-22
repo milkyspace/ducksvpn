@@ -260,7 +260,7 @@ async def start(message: types.Message):
                 referrerUser = await User.GetInfo(referrer_id)
 
                 comingUserInfo = message.from_user.full_name
-                if str(message.from_user.username) is not 'None':
+                if str(message.from_user.username) != 'None':
                     comingUserInfo = comingUserInfo + '(' + username + ')'
 
                 await bot.send_message(referrer_id,
