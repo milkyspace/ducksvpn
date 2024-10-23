@@ -1048,14 +1048,6 @@ def checkTime():
                         conn.close()
 
                         if log is None:
-                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
-                                          (i['tgid'], 'type_2hours',))
-                            conn.commit()
-                            dbCur.close()
-                            conn.close()
-
                             Butt_reffer = types.InlineKeyboardMarkup()
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
@@ -1065,6 +1057,14 @@ def checkTime():
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
                                                      reply_markup=Butt_reffer,
                                                      parse_mode="HTML")
+
+                            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                            dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
+                                          (i['tgid'], 'type_2hours',))
+                            conn.commit()
+                            dbCur.close()
+                            conn.close()
 
                     elif remained_time > 7200 and remained_time <= 86400:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
