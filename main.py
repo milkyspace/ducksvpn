@@ -1077,13 +1077,13 @@ def checkTime():
                         conn.close()
 
                         if log is None:
-                            print(i['tgid'])
                             Butt_reffer = types.InlineKeyboardMarkup()
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
                                     e.emojize(f"Продлить подписку :money_bag:"),
                                     callback_data="PayBlock"))
                             BotChecking = TeleBot(BOTAPIKEY)
+                            print(BotChecking)
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
                                                      reply_markup=Butt_reffer,
                                                      parse_mode="HTML")
