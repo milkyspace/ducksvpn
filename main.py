@@ -847,7 +847,7 @@ async def Referrer(call: types.CallbackQuery):
     msg = e.emojize(f"<b>Реферальная программа</b>\n\r\n\r" \
                     f":fire: Получите подписку, пригласив друзей по реферальной ссылке. Они получат неделю VPN бесплатно, а если после этого оформят подписку, мы подарим вам за каждого по месяцу подписки на DUCKS VPN!\n\r\n\r" \
                     f":money_bag: А если вы блогер или владелец крупного сообщества, присоединяйтесь к нашей партнерской программе и зарабатывайте, рассказывая о DUCKS VPN! Напишите нам @vpnducks_support\n\r" \
-                    f"\n\rВаша пригласительная ссылка (кликните по ней, чтобы скопировать): \n\r<code>{refLink}</code>"
+                    f"\n\rВаша пригласительная ссылка (кликните по ней, чтобы скопировать): \n\r<blockquote>{refLink}</blockquote>"
                     f"\n\r\n\rПользователей, пришедших по вашей ссылке: {str(countReferal)}")
 
     await bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
