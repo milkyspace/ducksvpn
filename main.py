@@ -882,6 +882,7 @@ async def AddTimeToUser(tgid, timetoadd):
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
         dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
                       (str(int(time.time()) + timetoadd), userdat.tgid))
+        dbCur.execute(f"DELETE * FROM notions where tgid=%s", (userdat.tgid))
         conn.commit()
         dbCur.close()
         conn.close()
@@ -1105,6 +1106,7 @@ def checkTime():
         except ApiTelegramException as exception:
             print("ApiTelegramException")
             print(exception.description)
+            print(traceback.format_exc())
             pass
         except Exception as err:
             print('NOT AWAIT ERROR')
