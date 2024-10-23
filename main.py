@@ -882,7 +882,7 @@ async def AddTimeToUser(tgid, timetoadd):
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
         dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
                       (str(int(time.time()) + timetoadd), userdat.tgid))
-        dbCur.execute(f"DELETE * FROM notions where tgid=%s", (userdat.tgid))
+        dbCur.execute(f"DELETE FROM notions where tgid=%s", (userdat.tgid))
         conn.commit()
         dbCur.close()
         conn.close()
