@@ -1077,6 +1077,7 @@ def checkTime():
                         conn.close()
 
                         if log is None:
+                            print(i['tgid'])
                             Butt_reffer = types.InlineKeyboardMarkup()
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
