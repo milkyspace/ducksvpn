@@ -1085,6 +1085,8 @@ def checkTime():
                             dbCur.close()
                             conn.close()
 
+                            print(tgid)
+
                             Butt_reffer = types.InlineKeyboardMarkup()
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
