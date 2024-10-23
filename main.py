@@ -1037,6 +1037,19 @@ def checkTime():
                                                  texts_for_bot["ended_sub_message"],
                                                  reply_markup=Butt_main, parse_mode="HTML")
 
+                        Butt_reffer = types.InlineKeyboardMarkup()
+                        Butt_reffer.add(
+                            types.InlineKeyboardButton(
+                                e.emojize(f"Продлить подписку :money_bag:"),
+                                callback_data="PayBlock"))
+                        Butt_reffer.add(
+                            types.InlineKeyboardButton(
+                                e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                                callback_data="Referrer"))
+                        BotChecking.send_message(i['tgid'],
+                                                 texts_for_bot["ended_sub_message_2"],
+                                                 reply_markup=Butt_reffer, parse_mode="HTML")
+
                     elif remained_time > 0 and remained_time <= 7200:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                         dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -1053,6 +1066,10 @@ def checkTime():
                                 types.InlineKeyboardButton(
                                     e.emojize(f"Продлить подписку :money_bag:"),
                                     callback_data="PayBlock"))
+                            Butt_reffer.add(
+                                types.InlineKeyboardButton(
+                                    e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                                    callback_data="Referrer"))
                             BotChecking = TeleBot(BOTAPIKEY)
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
                                                      reply_markup=Butt_reffer,
@@ -1083,7 +1100,7 @@ def checkTime():
                                                            callback_data="PayBlock"))
                             BotChecking = TeleBot(BOTAPIKEY)
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
-                                                            reply_markup=Butt_reffer, parse_mode="HTML")
+                                                     reply_markup=Butt_reffer, parse_mode="HTML")
 
                             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                             dbCur = conn.cursor(pymysql.cursors.DictCursor)
