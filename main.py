@@ -1082,10 +1082,9 @@ def checkTime():
                                 types.InlineKeyboardButton(e.emojize(f"Продлить подписку :money_bag:"),
                                                            callback_data="PayBlock"))
                             BotChecking = TeleBot(BOTAPIKEY)
-                            print(texts_for_bot["alert_to_renew_sub_24hours"])
-                            send = BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
+                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
                                                             reply_markup=Butt_reffer, parse_mode="HTML")
-                            print(send)
+
                             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                             dbCur = conn.cursor(pymysql.cursors.DictCursor)
                             dbCur.execute(f"INSERT INTO notions (tgid,notion_type) values (%s,%s)",
