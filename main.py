@@ -586,6 +586,10 @@ async def Work_with_Message(m: types.Message):
             print("sendMessageToAllInactiveUser")
             print(exception.description)
             pass
+        except Exception as err:
+            print(err)
+            print(traceback.format_exc())
+            pass
 
     await bot.delete_state(m.from_user.id)
     await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
