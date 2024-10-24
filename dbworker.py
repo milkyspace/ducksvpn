@@ -124,6 +124,7 @@ class User:
                 f"INSERT INTO userss (tgid,subscription,username,fullname,referrer_id, type) values (%s,%s,%s,%s,%s,%s)",
                 (self.tgid, str(int(time.time()) + int(CONFIG['trial_period']) * 86400), str(username),
                  str(full_name), referrer_id, 'xui'))
+
             conn.commit()
             dbCur.close()
             conn.close()
