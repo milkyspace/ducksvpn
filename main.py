@@ -280,7 +280,7 @@ async def start(message: types.Message):
 
                 for admin in CONFIG["admin_tg_id"]:
                     await bot.send_message(admin,
-                                           f"По ссылке от пользователя {referrer_id} пришел новый пользователь: {comingUserInfo}")
+                                           f"По ссылке от пользователя @{referrerUser.username}({referrer_id}) пришел новый пользователь: {comingUserInfo}")
 
             # Приветствуем нового пользователя (реферала)
             user_dat = await User.GetInfo(message.chat.id)
