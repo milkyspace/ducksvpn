@@ -580,7 +580,7 @@ async def Work_with_Message(m: types.Message):
 
     for i in allusers:
         try:
-            userDat = await User.GetInfo(i.tgid)
+            userDat = await User.GetInfo(i['tgid'])
             await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML", reply_markup=await main_buttons(userDat, True))
         except ApiTelegramException as exception:
             print("sendMessageToAllInactiveUser")
