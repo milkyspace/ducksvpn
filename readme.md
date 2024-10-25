@@ -104,6 +104,17 @@ sudo systemctl start ducksVpnTelegram
 sudo systemctl status ducksVpnTelegram
 ```
 
+For convenience, you can add these aliases
+
+```sh
+alias dvpn="sudo systemctl stop ducksVpnTelegram && sudo systemctl start ducksVpnTelegram && sudo systemctl status ducksVpnTelegram"
+alias dvpnstatus="sudo systemctl status ducksVpnTelegram"
+alias dvpnstop="sudo systemctl stop ducksVpnTelegram"
+alias dvpntest="python3 /var/www/ducksvpn/main.py"
+alias dvpnmysql="mysql -u User -pPassword"
+alias dvpndir="cd /var/www/ducksvpn"
+alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
+```
 
 ## License
 
