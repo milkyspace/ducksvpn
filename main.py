@@ -581,7 +581,8 @@ async def Work_with_Message(m: types.Message):
     for i in allusers:
         try:
             userDat = await User.GetInfo(i['tgid'])
-            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML", reply_markup=await main_buttons(userDat, True))
+            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML",
+                                   reply_markup=await main_buttons(userDat, True))
         except ApiTelegramException as exception:
             print("sendMessageToAllInactiveUser")
             print(exception.description)
@@ -1140,4 +1141,10 @@ if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
     threadcheckTime.start()
 
-    asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=60, timeout=60))
+    try:
+        asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=90, timeout=60))
+    except Exception as err:
+        print('asyncio error')
+        print(err)
+        print(traceback.format_exc())
+        pass
