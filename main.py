@@ -981,7 +981,8 @@ async def got_payment(m):
     addTimeSubscribe = month * 30 * 24 * 60 * 60
 
     user_dat = await User.GetInfo(m.from_user.id)
-    dateto = datetime.utcfromtimestamp(int(user_dat.subscription + addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
+    dateto = datetime.utcfromtimestamp(
+        int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
         '%d.%m.%Y %H:%M')
     await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"] + f" {dateto} МСК"),
                            reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
