@@ -275,7 +275,7 @@ async def start(message: types.Message):
 
                 comingUserInfo = message.from_user.full_name
                 if str(message.from_user.username) != 'None':
-                    comingUserInfo = comingUserInfo + '(' + username + ')'
+                    comingUserInfo = comingUserInfo + ' ( ' + username + ' )'
 
                 await bot.send_message(referrer_id,
                                        f"По вашей ссылке пришел новый пользователь: {comingUserInfo}\nВы получите +1 месяц бесплатного доступа, если он оплатит подписку",
@@ -283,7 +283,7 @@ async def start(message: types.Message):
 
                 for admin in CONFIG["admin_tg_id"]:
                     await bot.send_message(admin,
-                                           f"По ссылке от пользователя {referrerUser.username}({referrer_id}) пришел новый пользователь: {comingUserInfo}")
+                                           f"По ссылке от пользователя {referrerUser.username} ( {referrer_id} ) пришел новый пользователь: {comingUserInfo}")
 
             # Приветствуем нового пользователя (реферала)
             user_dat = await User.GetInfo(message.chat.id)
