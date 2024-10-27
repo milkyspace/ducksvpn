@@ -185,19 +185,23 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                 instructionWindows = f"<b>Подключение VPN DUCKS на Windows</b>\n\r\n\r1. Установите <a href='https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0_x64.exe'>AmneziaVPN</a>\n\r2. Установите скачанную программу\n\r3.Откройте прикрепленный выше файл конфигурации vpnducks_{str(user_dat.tgid)}.conf в программе AmneziaVPN\n\r4. Нажмите на кнопку подключиться\n\r5. Нажмите на большую круглую кнопку подключиться на главном экране программы и разрешите установить VPN соединение. Готово\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
                 instructionMacOS = f"<b>Подключение VPN DUCKS на MacOS</b>\n\r\n\r1. Установите <a href='https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0.dmg'>AmneziaVPN</a>\n\r2. Установите скачанную программу\n\r3.Откройте прикрепленный выше файл конфигурации vpnducks_{str(user_dat.tgid)}.conf в программе AmneziaVPN\n\r4. Нажмите на кнопку подключиться\n\r5. Нажмите на большую круглую кнопку подключиться на главном экране программы и разрешите установить VPN соединение. Готово\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
                 if (device == "iPhone"):
-                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionIPhone), parse_mode="HTML",
+                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionIPhone),
+                                            parse_mode="HTML",
                                             reply_markup=await main_buttons(user_dat, True), document=configFull,
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
                 if (device == "Android"):
-                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionAndroid), parse_mode="HTML",
+                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionAndroid),
+                                            parse_mode="HTML",
                                             reply_markup=await main_buttons(user_dat, True), document=configFull,
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
                 if (device == "Windows"):
-                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionWindows), parse_mode="HTML",
+                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionWindows),
+                                            parse_mode="HTML",
                                             reply_markup=await main_buttons(user_dat, True), document=configFull,
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
                 if (device == "MacOS"):
-                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionMacOS), parse_mode="HTML",
+                    await bot.send_document(chat_id=user_dat.tgid, caption=e.emojize(instructionMacOS),
+                                            parse_mode="HTML",
                                             reply_markup=await main_buttons(user_dat, True), document=configFull,
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
             else:
@@ -205,7 +209,9 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                        f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к @vpnducks_support",
                                        reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
         except:
-            await bot.send_message(user_dat.tgid, "Выдать ключ не получилось :(\r\n\r\nСмените протокол. Нажмите на Помощь -> Сменить протокол", reply_markup=await buttons.admin_buttons())
+            await bot.send_message(user_dat.tgid,
+                                   "Выдать ключ не получилось :(\r\n\r\nСмените протокол. Нажмите на Помощь -> Сменить протокол",
+                                   reply_markup=await buttons.admin_buttons())
 
 
 async def addTrialForReferrerByUserId(userId):
@@ -974,8 +980,18 @@ async def got_payment(m):
     month = int(str(payment.invoice_payload).split(":")[1])
 
     user_dat = await User.GetInfo(m.from_user.id)
-    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"]),
+    dateto = datetime.utcfromtimestamp(int(user_dat.subscription) + CONFIG["UTC_time"] * 3600).strftime(
+        '%d.%m.%Y %H:%M')
+    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"] + f" {dateto} МСК"),
                            reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
+
+    Butt_reffer = types.InlineKeyboardMarkup()
+    Butt_reffer.add(
+        types.InlineKeyboardButton(
+            e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+            callback_data="Referrer"))
+    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
+                           reply_markup=Butt_reffer, parse_mode="HTML")
 
     addTimeSubscribe = month * 30 * 24 * 60 * 60
     await AddTimeToUser(m.from_user.id, addTimeSubscribe)
