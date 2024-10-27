@@ -834,12 +834,13 @@ async def Init(call: types.CallbackQuery):
             f"Запрос отправлен. Пожалуйста, дождитесь сообщения о смене протокола :winking_face:"), parse_mode="HTML")
         isTypeChanged = await user_dat.changeType()
         if isTypeChanged:
-            await addUser(user_dat.tgid, user_dat.username)
-            await bot.send_message(user_dat.tgid,
+            userDatNew = await User.GetInfo(call.from_user.id)
+            await addUser(userDatNew.tgid, userDatNew.username, userDatNew.type)
+            await bot.send_message(userDatNew.tgid,
                                    e.emojize(
                                        'Протокол изменен.\nДля подключения нажмите на кнопку Как подключить :gear:'),
                                    parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat, True))
+                                   reply_markup=await main_buttons(userDatNew, True))
     else:
         await bot.send_message(user_dat.tgid, e.emojize('Напишите нам @vpnducks_support'), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat, True))

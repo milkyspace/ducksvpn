@@ -59,7 +59,7 @@ def getTokenDefault(breakLoop=True):
         return ""
 
 
-async def addUser(userid, username):
+async def addUser(userid, username, type=''):
     token = f"Bearer {await getToken()}"
     response = requests.post(
         f"{SERVER_MANAGER_URL}/vpnservers",
@@ -69,7 +69,8 @@ async def addUser(userid, username):
         data=json.dumps({
             "id": str(userid),
             "name": str(username),
-            "limit_ip": 3
+            "limit_ip": 3,
+            "type": type,
         }))
 
     if response:
