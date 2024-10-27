@@ -984,7 +984,7 @@ async def got_payment(m):
     dateto = datetime.utcfromtimestamp(
         int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
         '%d.%m.%Y %H:%M')
-    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"] + f" {dateto} МСК"),
+    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
                            reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
 
     Butt_reffer = types.InlineKeyboardMarkup()
