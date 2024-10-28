@@ -980,32 +980,63 @@ async def got_payment(m):
     month = int(str(payment.invoice_payload).split(":")[1])
     addTimeSubscribe = month * 30 * 24 * 60 * 60
 
-    await AddTimeToUser(m.from_user.id, addTimeSubscribe)
+    try:
+        await AddTimeToUser(m.from_user.id, addTimeSubscribe)
+    except Exception as err:
+        print('***--- ADD TIME ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
     user_dat = await User.GetInfo(m.from_user.id)
-    dateto = datetime.utcfromtimestamp(
-        int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
-        '%d.%m.%Y %H:%M')
-    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
-                           reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
+    try:
+        dateto = datetime.utcfromtimestamp(
+            int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
+            '%d.%m.%Y %H:%M')
+        await bot.send_message(m.from_user.id,
+                               e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
+                               reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
+    except Exception as err:
+        print('***--- PAY MESSAGE 1 ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
-    Butt_reffer = types.InlineKeyboardMarkup()
-    Butt_reffer.add(
-        types.InlineKeyboardButton(
-            e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
-            callback_data="Referrer"))
-    await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
-                           reply_markup=Butt_reffer, parse_mode="HTML")
+    try:
+        Butt_reffer = types.InlineKeyboardMarkup()
+        Butt_reffer.add(
+            types.InlineKeyboardButton(
+                e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                callback_data="Referrer"))
+        await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
+                               reply_markup=Butt_reffer, parse_mode="HTML")
+    except Exception as err:
+        print('***--- PAY MESSAGE 2 ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
-    payment_id = str(payment.provider_payment_charge_id)
-    # save info about user
-    await user_dat.NewPay(
-        payment_id,
-        getCostBySale(month),
-        addTimeSubscribe,
-        m.from_user.id)
+    try:
+        payment_id = str(payment.provider_payment_charge_id)
+        # save info about user
+        await user_dat.NewPay(
+            payment_id,
+            getCostBySale(month),
+            addTimeSubscribe,
+            m.from_user.id)
+    except Exception as err:
+        print('***--- PAIMENT INFO DB ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
-    await addTrialForReferrerByUserId(m.from_user.id)
+    try:
+        await addTrialForReferrerByUserId(m.from_user.id)
+    except Exception as err:
+        print('***--- ADD TRIAL TO REFERRER AFTER PAY ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
     for admin in CONFIG["admin_tg_id"]:
         await bot.send_message(admin,
