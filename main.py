@@ -1049,6 +1049,7 @@ bot.add_custom_filter(asyncio_filters.StateFilter(bot))
 
 def checkTime():
     global e
+    BotChecking = TeleBot(BOTAPIKEY)
     while True:
         try:
             time.sleep(15)
@@ -1090,7 +1091,6 @@ def checkTime():
                             Butt_main.add(
                                 types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
 
-                        BotChecking = TeleBot(BOTAPIKEY)
                         BotChecking.send_message(i['tgid'],
                                                  texts_for_bot["ended_sub_message"],
                                                  reply_markup=Butt_main, parse_mode="HTML")
@@ -1128,7 +1128,6 @@ def checkTime():
                                 types.InlineKeyboardButton(
                                     e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
                                     callback_data="Referrer"))
-                            BotChecking = TeleBot(BOTAPIKEY)
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
                                                      reply_markup=Butt_reffer,
                                                      parse_mode="HTML")
@@ -1156,7 +1155,6 @@ def checkTime():
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(e.emojize(f"Продлить подписку :money_bag:"),
                                                            callback_data="PayBlock"))
-                            BotChecking = TeleBot(BOTAPIKEY)
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
                                                      reply_markup=Butt_reffer, parse_mode="HTML")
 
