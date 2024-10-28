@@ -980,6 +980,8 @@ async def got_payment(m):
     month = int(str(payment.invoice_payload).split(":")[1])
     addTimeSubscribe = month * 30 * 24 * 60 * 60
 
+    await AddTimeToUser(m.from_user.id, addTimeSubscribe)
+
     user_dat = await User.GetInfo(m.from_user.id)
     dateto = datetime.utcfromtimestamp(
         int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
@@ -994,8 +996,6 @@ async def got_payment(m):
             callback_data="Referrer"))
     await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
                            reply_markup=Butt_reffer, parse_mode="HTML")
-
-    await AddTimeToUser(m.from_user.id, addTimeSubscribe)
 
     payment_id = str(payment.provider_payment_charge_id)
     # save info about user
