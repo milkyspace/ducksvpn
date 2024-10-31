@@ -146,7 +146,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             data = connectionLinks['data']
             link = data['link']
 
-            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение Streisand из AppStore\n\r"\
+            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a>\n\r"\
                                 f"2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже и вставьте в приложение Streisand, нажмите кнопку ➕ вверху, и затем \"Добавить из буфера\"\n\r"\
                                 f"3. Дайте разрешения приложению Streisand на вставку файла\n\r"\
                                 f"4. Включите VPN, нажав синюю кнопку и дайте разрешение на добавление конфигурации.\n\r\n\r"\
