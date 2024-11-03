@@ -822,9 +822,12 @@ async def Work_with_Message(m: types.Message):
             return
         if "Подписка активна до:" in m.text:
             return
+
         for admin in CONFIG["admin_tg_id"]:
             await bot.send_message(admin,
                                    f"Новое сообщение от @{m.from_user.username} ({m.from_user.id}): {e.emojize(m.text)}")
+        await bot.send_message(m.from_user.id, f"Есть вопрос? Напишите нам @vpnducks_support", reply_markup=await main_buttons(user_dat, True))
+
         return
 
 
