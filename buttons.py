@@ -20,7 +20,7 @@ async def main_buttons(user: User, wasUpdate = None):
             Butt_main.add(types.KeyboardButton(e.emojize(f":green_circle: Подписка активна до: {dateto} МСК")))
 
         Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
-        Butt_main.add(types.KeyboardButton(e.emojize(f"Почему стоит выбрать нас? :smiling_face_with_sunglasses:")), types.KeyboardButton(e.emojize(f"Пригласить :woman_and_man_holding_hands:")), types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
+        Butt_main.add(types.KeyboardButton(e.emojize(f"Наши преимущества :gem:")), types.KeyboardButton(e.emojize(f"Пригласить :gift:")), types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
 
         if user.tgid in CONFIG["admin_tg_id"]:
             Butt_main.add(types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))

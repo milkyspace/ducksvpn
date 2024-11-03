@@ -119,7 +119,7 @@ async def sendPayMessage(chatId):
         types.InlineKeyboardButton(e.emojize(f"1 год: {int(getCostBySale(12))} руб. (-{getSale(12)}%)"),
                                    callback_data="BuyMonth:12"))
     await bot.send_message(chatId,
-                           "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\nВыберите период, на который хотите приобрести подписку:",
+                           "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:",
                            reply_markup=Butt_payment, parse_mode="HTML")
 
 
@@ -152,7 +152,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                 f"4. Включите VPN, нажав синюю кнопку и дайте разрешение на добавление конфигурации.\n\r\n\r" \
                                 f"<b>Важная настройка!</b>\n\r" \
                                 f"Откройте Настройки в нижнем правом углу приложения, затем выберете \"Туннель\": \"Постоянный тунель\" переведите в активное состояние и \"IP Settings\" поменяйте на IPv4. Готово 🎉\n\r\n\r" \
-                                f"Что-то не получилось? Напишите нам @vpnducks_support"
+                                f"Что-то не получилось? Напишите нам @vpnducks_support\n\r" \
+                                f"<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>"
             instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение <a href='https://play.google.com/store/apps/details/v2rayNG?id=com.v2ray.ang'>v2rayNG из Google Play</a>. Если у вас нет Google Play, напишите @vpnducks_support и мы отправим файл для установки приложения\n\r2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже, перейдите в установленное в первом пункте приложение v2rayNG, внутри приложения нажмите кнопку ➕, находящуюся вверху справа, затем \"Импорт из буфера обмена\"\n\r3. Нажмите на кнопку ▶️ внизу справа и выдайте приложению требуемые разрешения. Готово! 🎉\n\r\n\r<a href=\"https://t.me/vpnducks_video/7\">Видео-инструкция</a>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionWindows = f"<b>Подключение VPN DUCKS на Windows</b>\n\r\n\r1. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже\n\r2. Следуйте инструкции https://telegra.ph/Instrukciya-po-ustanovke-Ducks-VPN-na-Windows-10-22\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionMacOS = f"<b>Подключение VPN DUCKS на MacOS</b>\n\r\n\r1. Установите <a href='https://apps.apple.com/ru/app/foxray/id6448898396'>FoXray</a>\n\r2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже, перейдите в установленное в первом пункте приложение, внутри приложения импортируйте строку\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
@@ -675,7 +676,7 @@ async def Work_with_Message(m: types.Message):
         return
     await user_dat.CheckNewNickname(m)
 
-    if e.demojize(m.text) == "Почему стоит выбрать нас? :smiling_face_with_sunglasses:":
+    if e.demojize(m.text) == "Наши преимущества :gem:":
         await bot.send_message(m.chat.id, e.emojize(texts_for_bot["hello_message"]), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat))
         return
@@ -791,14 +792,13 @@ async def Work_with_Message(m: types.Message):
         await sendConfig(m.chat.id)
         return
 
-    if e.demojize(m.text) == "Пригласить :woman_and_man_holding_hands:":
+    if e.demojize(m.text) == "Пригласить :gift:":
         countReferal = await user_dat.countReferrerByUser()
         refLink = f"https://t.me/{CONFIG['bot_name']}?start=" + str(user_dat.tgid)
 
         msg = e.emojize(f"<b>Реферальная программа</b>\n\r\n\r" \
-                        f":fire: Получите подписку, пригласив друзей по реферальной ссылке. Они получат неделю VPN бесплатно, а если после этого оформят подписку, мы подарим вам за каждого по месяцу подписки на VPN Ducks!\n\r\n\r" \
-                        f":money_bag: А если вы блогер или владелец крупного сообщества, присоединяйтесь к нашей партнерской программе и зарабатывайте, рассказывая о VPN Ducks! Напишите нам @vpnducks_support\n\r" \
-                        f"\n\rВаша пригласительная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{refLink}</code></b>"
+                        f":gift: Получите бесплатную подписку, приглашая друзей по реферальной ссылке. Они получат неделю VPN бесплатно, а если после этого оформят подписку, мы подарим вам за каждого друга +1 месяц подписки на VPN Ducks!\n\r\n\r" \
+                        f"Ваша пригласительная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{refLink}</code></b>" \
                         f"\n\r\n\rПользователей, пришедших по вашей ссылке: {str(countReferal)}")
 
         await bot.send_message(chat_id=m.chat.id, text=msg, parse_mode='HTML')
@@ -1034,7 +1034,7 @@ async def got_payment(m):
         Butt_reffer = types.InlineKeyboardMarkup()
         Butt_reffer.add(
             types.InlineKeyboardButton(
-                e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                e.emojize(f"Пригласить друга :gift:"),
                 callback_data="Referrer"))
         await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
                                reply_markup=Butt_reffer, parse_mode="HTML")
@@ -1113,8 +1113,8 @@ def checkTime():
                                       types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
                         Butt_main.add(
                             types.KeyboardButton(
-                                e.emojize(f"Почему стоит выбрать нас? :smiling_face_with_sunglasses:")),
-                            types.KeyboardButton(e.emojize(f"Пригласить :woman_and_man_holding_hands:")),
+                                e.emojize(f"Наши преимущества :gem:")),
+                            types.KeyboardButton(e.emojize(f"Пригласить :gift:")),
                             types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
                         if i['tgid'] in CONFIG["admin_tg_id"]:
                             Butt_main.add(
@@ -1131,7 +1131,7 @@ def checkTime():
                                 callback_data="PayBlock"))
                         Butt_reffer.add(
                             types.InlineKeyboardButton(
-                                e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                                e.emojize(f"Пригласить друга :gift:"),
                                 callback_data="Referrer"))
                         BotChecking.send_message(i['tgid'],
                                                  texts_for_bot["ended_sub_message_2"],
@@ -1155,7 +1155,7 @@ def checkTime():
                                     callback_data="PayBlock"))
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
-                                    e.emojize(f"Пригласить друга :woman_and_man_holding_hands:"),
+                                    e.emojize(f"Пригласить друга :gift:"),
                                     callback_data="Referrer"))
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
                                                      reply_markup=Butt_reffer,
