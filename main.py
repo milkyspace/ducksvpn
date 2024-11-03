@@ -120,7 +120,7 @@ async def sendPayMessage(chatId):
                                    callback_data="BuyMonth:12"))
     await bot.send_message(chatId,
                            "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:",
-                           reply_markup=Butt_payment, parse_mode="HTML")
+                           disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
 
 
 async def sendConfig(chatId):
