@@ -1224,7 +1224,7 @@ if __name__ == '__main__':
     threadcheckTime.start()
 
     try:
-        asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=300, timeout=60))
+        asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=90, timeout=60))
     except Exception as err:
         print('asyncio error')
         print(err)
