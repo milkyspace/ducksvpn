@@ -676,7 +676,7 @@ async def Work_with_Message(m: types.Message):
         return
     await user_dat.CheckNewNickname(m)
 
-    if e.demojize(m.text) == "Наши преимущества :wrapped_gift:":
+    if e.demojize(m.text) == "Наши преимущества :gem_stone:":
         await bot.send_message(m.chat.id, e.emojize(texts_for_bot["hello_message"]), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat))
         return
@@ -1113,7 +1113,7 @@ def checkTime():
                                       types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
                         Butt_main.add(
                             types.KeyboardButton(
-                                e.emojize(f"Наши преимущества :wrapped_gift:")),
+                                e.emojize(f"Наши преимущества :gem_stone:")),
                             types.KeyboardButton(e.emojize(f"Пригласить :wrapped_gift:")),
                             types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
                         if i['tgid'] in CONFIG["admin_tg_id"]:
