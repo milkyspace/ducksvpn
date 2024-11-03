@@ -146,12 +146,12 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             data = connectionLinks['data']
             link = data['link']
 
-            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a>\n\r"\
-                                f"2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже и вставьте в приложение Streisand, нажмите кнопку ➕ вверху, и затем \"Добавить из буфера\"\n\r"\
-                                f"3. Дайте разрешения приложению Streisand на вставку файла\n\r"\
-                                f"4. Включите VPN, нажав синюю кнопку и дайте разрешение на добавление конфигурации.\n\r\n\r"\
-                                f"<b>Важная настройка!</b>\n\r"\
-                                f"Откройте Настройки в нижнем правом углу приложения, затем выберете \"Туннель\": \"Постоянный тунель\" переведите в активное состояние и \"IP Settings\" поменяйте на IPv4. Готово 🎉\n\r\n\r"\
+            instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a>\n\r" \
+                                f"2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже и вставьте в приложение Streisand, нажмите кнопку ➕ вверху, и затем \"Добавить из буфера\"\n\r" \
+                                f"3. Дайте разрешения приложению Streisand на вставку файла\n\r" \
+                                f"4. Включите VPN, нажав синюю кнопку и дайте разрешение на добавление конфигурации.\n\r\n\r" \
+                                f"<b>Важная настройка!</b>\n\r" \
+                                f"Откройте Настройки в нижнем правом углу приложения, затем выберете \"Туннель\": \"Постоянный тунель\" переведите в активное состояние и \"IP Settings\" поменяйте на IPv4. Готово 🎉\n\r\n\r" \
                                 f"Что-то не получилось? Напишите нам @vpnducks_support"
             instructionAndroid = f"<b>Подключение VPN DUCKS на Android</b>\n\r\n\r1. Установите приложение <a href='https://play.google.com/store/apps/details/v2rayNG?id=com.v2ray.ang'>v2rayNG из Google Play</a>. Если у вас нет Google Play, напишите @vpnducks_support и мы отправим файл для установки приложения\n\r2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже, перейдите в установленное в первом пункте приложение v2rayNG, внутри приложения нажмите кнопку ➕, находящуюся вверху справа, затем \"Импорт из буфера обмена\"\n\r3. Нажмите на кнопку ▶️ внизу справа и выдайте приложению требуемые разрешения. Готово! 🎉\n\r\n\r<a href=\"https://t.me/vpnducks_video/7\">Видео-инструкция</a>\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
             instructionWindows = f"<b>Подключение VPN DUCKS на Windows</b>\n\r\n\r1. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже\n\r2. Следуйте инструкции https://telegra.ph/Instrukciya-po-ustanovke-Ducks-VPN-na-Windows-10-22\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support"
@@ -221,17 +221,17 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
 
 
 async def addTrialForReferrerByUserId(userId):
-    user_dat = await User.GetInfo(userId)
+    userDat = await User.GetInfo(userId)
     try:
-        if user_dat.referrer_id and user_dat.referrer_id > 0:
-            referrer_id = int(user_dat.referrer_id)
+        if userDat.referrer_id and userDat.referrer_id > 0:
+            referrer_id = int(userDat.referrer_id)
         else:
             referrer_id = 0
     except TypeError:
         referrer_id = 0
 
     if referrer_id != 0:
-        user_dat_referrer = await User.GetInfo(user_dat.referrer_id)
+        userDatReferrer = await User.GetInfo(userDat.referrer_id)
         addTrialTime = 30 * CONFIG['count_free_from_referrer'] * 60 * 60 * 24
 
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -242,9 +242,14 @@ async def addTrialForReferrerByUserId(userId):
         dbCur.close()
         conn.close()
 
-        await bot.send_message(user_dat.referrer_id,
+        await bot.send_message(userDat.referrer_id,
                                f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
-                               reply_markup=await main_buttons(user_dat_referrer, True), parse_mode="HTML")
+                               reply_markup=await main_buttons(userDatReferrer, True), parse_mode="HTML")
+
+        for admin in CONFIG["admin_tg_id"]:
+            await bot.send_message(admin,
+                                   f"Оплативший пользователь пришел от {userDat.username} ( {userDat.referrer_id} )",
+                                   parse_mode="HTML")
 
 
 @bot.message_handler(commands=['start'])
@@ -984,6 +989,23 @@ def getSale(month):
 async def got_payment(m):
     payment: types.SuccessfulPayment = m.successful_payment
     month = int(str(payment.invoice_payload).split(":")[1])
+    paymentsCount = 0
+
+    try:
+        # находим прошлые оплаты
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"select COUNT(*) as count from payments where tgid=%s", (m.from_user.id,))
+        paymentsConn = dbCur.fetchone()
+        paymentsCount = paymentsConn['count']
+        dbCur.close()
+        conn.close()
+    except Exception as err:
+        print('***--- FOUND PAYMENTS ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
     addTimeSubscribe = month * 30 * 24 * 60 * 60
 
     try:
@@ -1036,18 +1058,19 @@ async def got_payment(m):
         print(traceback.format_exc())
         pass
 
+    for admin in CONFIG["admin_tg_id"]:
+        await bot.send_message(admin,
+                               f"Новая оплата подписки от @{m.from_user.username} ( {m.from_user.id} ) на <b>{month}</b> мес. : {getCostBySale(month)} руб.",
+                               parse_mode="HTML")
+
     try:
-        await addTrialForReferrerByUserId(m.from_user.id)
+        if paymentsCount == 0:
+            await addTrialForReferrerByUserId(m.from_user.id)
     except Exception as err:
         print('***--- ADD TRIAL TO REFERRER AFTER PAY ERROR ---***')
         print(err)
         print(traceback.format_exc())
         pass
-
-    for admin in CONFIG["admin_tg_id"]:
-        await bot.send_message(admin,
-                               f"Новая оплата подписки от @{m.from_user.username} ( {m.from_user.id} ) на <b>{month}</b> мес. : {getCostBySale(month)} руб.",
-                               parse_mode="HTML")
 
 
 bot.add_custom_filter(asyncio_filters.StateFilter(bot))
