@@ -676,7 +676,7 @@ async def Work_with_Message(m: types.Message):
         return
     await user_dat.CheckNewNickname(m)
 
-    if e.demojize(m.text) == "Наши преимущества :gem:":
+    if e.demojize(m.text) == "Наши преимущества :wrapped_gift:":
         await bot.send_message(m.chat.id, e.emojize(texts_for_bot["hello_message"]), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat))
         return
@@ -792,12 +792,12 @@ async def Work_with_Message(m: types.Message):
         await sendConfig(m.chat.id)
         return
 
-    if e.demojize(m.text) == "Пригласить :gift:":
+    if e.demojize(m.text) == "Пригласить :wrapped_gift:":
         countReferal = await user_dat.countReferrerByUser()
         refLink = f"https://t.me/{CONFIG['bot_name']}?start=" + str(user_dat.tgid)
 
         msg = e.emojize(f"<b>Реферальная программа</b>\n\r\n\r" \
-                        f":gift: Получите бесплатную подписку, приглашая друзей по реферальной ссылке. Они получат неделю VPN бесплатно, а если после этого оформят подписку, мы подарим вам за каждого друга +1 месяц подписки на VPN Ducks!\n\r\n\r" \
+                        f":wrapped_gift: Получите бесплатную подписку, приглашая друзей по реферальной ссылке. Они получат неделю VPN бесплатно, а если после этого оформят подписку, мы подарим вам за каждого друга +1 месяц подписки на VPN Ducks!\n\r\n\r" \
                         f"Ваша пригласительная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{refLink}</code></b>" \
                         f"\n\r\n\rПользователей, пришедших по вашей ссылке: {str(countReferal)}")
 
@@ -1034,7 +1034,7 @@ async def got_payment(m):
         Butt_reffer = types.InlineKeyboardMarkup()
         Butt_reffer.add(
             types.InlineKeyboardButton(
-                e.emojize(f"Пригласить друга :gift:"),
+                e.emojize(f"Пригласить друга :wrapped_gift:"),
                 callback_data="Referrer"))
         await bot.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
                                reply_markup=Butt_reffer, parse_mode="HTML")
@@ -1113,8 +1113,8 @@ def checkTime():
                                       types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
                         Butt_main.add(
                             types.KeyboardButton(
-                                e.emojize(f"Наши преимущества :gem:")),
-                            types.KeyboardButton(e.emojize(f"Пригласить :gift:")),
+                                e.emojize(f"Наши преимущества :wrapped_gift:")),
+                            types.KeyboardButton(e.emojize(f"Пригласить :wrapped_gift:")),
                             types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
                         if i['tgid'] in CONFIG["admin_tg_id"]:
                             Butt_main.add(
@@ -1131,7 +1131,7 @@ def checkTime():
                                 callback_data="PayBlock"))
                         Butt_reffer.add(
                             types.InlineKeyboardButton(
-                                e.emojize(f"Пригласить друга :gift:"),
+                                e.emojize(f"Пригласить друга :wrapped_gift:"),
                                 callback_data="Referrer"))
                         BotChecking.send_message(i['tgid'],
                                                  texts_for_bot["ended_sub_message_2"],
@@ -1155,7 +1155,7 @@ def checkTime():
                                     callback_data="PayBlock"))
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(
-                                    e.emojize(f"Пригласить друга :gift:"),
+                                    e.emojize(f"Пригласить друга :wrapped_gift:"),
                                     callback_data="Referrer"))
                             BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
                                                      reply_markup=Butt_reffer,
