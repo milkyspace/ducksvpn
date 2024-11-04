@@ -1069,7 +1069,8 @@ async def got_payment(m):
                                parse_mode="HTML")
 
     try:
-        if paymentsCount <= 1:
+        print(paymentsCount)
+        if int(paymentsCount) <= 1:
             await addTrialForReferrerByUserId(m.from_user.id)
     except Exception as err:
         print('***--- ADD TRIAL TO REFERRER AFTER PAY ERROR ---***')
