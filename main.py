@@ -827,7 +827,8 @@ async def Work_with_Message(m: types.Message):
         for admin in CONFIG["admin_tg_id"]:
             await bot.send_message(admin,
                                    f"Новое сообщение от @{m.from_user.username} ({m.from_user.id}): {e.emojize(m.text)}")
-        await bot.send_message(m.from_user.id, f"Есть вопрос? Напишите нам @vpnducks_support", reply_markup=await main_buttons(user_dat, True))
+        await bot.send_message(m.from_user.id, f"Есть вопрос? Напишите нам @vpnducks_support",
+                               reply_markup=await main_buttons(user_dat, True))
 
         return
 
@@ -900,7 +901,7 @@ async def Buy_month(call: types.CallbackQuery):
     bill = await bot.send_invoice(call.message.chat.id, f"Оплата VPN", f"VPN на {str(Month_count)} мес.", call.data,
                                   currency="RUB", prices=[
             types.LabeledPrice(f"VPN на {str(Month_count)} мес.", getCostBySale(Month_count) * 100)],
-                                  provider_token=CONFIG["tg_shop_token"])
+                                  provider_token=CONFIG["tg_shop_token"], suggested_tip_amounts=[50,100,200,1000])
 
     await bot.answer_callback_query(call.id)
 
