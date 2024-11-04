@@ -1058,7 +1058,7 @@ async def got_payment(m):
             addTimeSubscribe,
             m.from_user.id)
     except Exception as err:
-        print('***--- PAIMENT INFO DB ERROR ---***')
+        print('***--- PAYMENT INFO DB ERROR ---***')
         print(err)
         print(traceback.format_exc())
         pass
@@ -1069,7 +1069,7 @@ async def got_payment(m):
                                parse_mode="HTML")
 
     try:
-        if paymentsCount == 0:
+        if paymentsCount <= 1:
             await addTrialForReferrerByUserId(m.from_user.id)
     except Exception as err:
         print('***--- ADD TRIAL TO REFERRER AFTER PAY ERROR ---***')
