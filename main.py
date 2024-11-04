@@ -792,7 +792,7 @@ async def Work_with_Message(m: types.Message):
         await sendConfig(m.chat.id)
         return
 
-    if e.demojize(m.text) == "Пригласить :wrapped_gift:":
+    if e.demojize(m.text) == "Пригласить :wrapped_gift:" or e.demojize(m.text) == "Пригласить :woman_and_man_holding_hands:":
         countReferal = await user_dat.countReferrerByUser()
         refLink = f"https://t.me/{CONFIG['bot_name']}?start=" + str(user_dat.tgid)
 
