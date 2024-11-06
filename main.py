@@ -2,8 +2,10 @@ import json
 import time
 import buttons
 import dbworker
+import pay
 import smrequests
 import emoji as e
+import emoji
 import threading
 import os
 import traceback
@@ -22,6 +24,7 @@ from buttons import main_buttons
 
 from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
 from dbworker import User
+from pay import Pay
 
 from dotenv import load_dotenv
 
@@ -48,6 +51,7 @@ CONFIG = {
     "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
     "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
     "server_manager_api_token": os.getenv("SERVER_MANAGER_API_TOKEN"),
+    "payment_system_code": os.getenv("PAYMENT_SYSTEM_CODE"),
 }
 
 dbworker.CONFIG = CONFIG
@@ -67,6 +71,10 @@ DBHOST = CONFIG["db_host"]
 DBUSER = CONFIG["db_name"]
 DBPASSWORD = CONFIG["db_user"]
 DBNAME = CONFIG["db_password"]
+
+PAYMENT_SYSTEM_CODE = CONFIG["payment_system_code"]
+
+BotCheck = TeleBot(BOTAPIKEY)
 
 
 class MyStates(StatesGroup):
@@ -126,10 +134,9 @@ async def sendPayMessage(chatId):
 async def sendConfig(chatId):
     user_dat = await User.GetInfo(chatId)
     if user_dat.trial_subscription == False:
-        trialButtons = await getTrialButtons()
         await bot.send_message(chat_id=chatId,
                                text=f"Пожалуйста, выберите тип устройства, для которого нужна инструкция для подключения:",
-                               parse_mode="HTML", reply_markup=trialButtons)
+                               parse_mode="HTML", reply_markup=await getTrialButtons())
     else:
         await bot.send_message(chat_id=chatId, text="Для этого необходимо оплатить подписку",
                                reply_markup=await main_buttons(user_dat))
@@ -250,6 +257,223 @@ async def addTrialForReferrerByUserId(userId):
             await bot.send_message(admin,
                                    f"Оплативший пользователь пришел от {userDat.username} ( {userDat.referrer_id} )",
                                    parse_mode="HTML")
+
+
+async def AddTimeToUser(tgid, timetoadd):
+    userdat = await User.GetInfo(tgid)
+
+    if int(userdat.subscription) < int(time.time()):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
+                      (str(int(time.time()) + timetoadd), userdat.tgid))
+        dbCur.execute(f"DELETE FROM notions where tgid=%s", (userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        await switchUserActivity(str(userdat.tgid), True)
+
+        await bot.send_message(userdat.tgid, e.emojize(
+            '<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support'),
+                               parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
+    else:
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s where tgid=%s",
+                      (str(int(userdat.subscription) + timetoadd), userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        await switchUserActivity(str(userdat.tgid), True)
+        await bot.send_message(userdat.tgid, e.emojize(
+            'Информация о подписке обновлена'), parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
+
+
+def addTrialForReferrerByUserIdSync(userId):
+    userDat = asyncio.run(User.GetInfo(userId))
+    try:
+        if userDat.referrer_id and userDat.referrer_id > 0:
+            referrer_id = int(userDat.referrer_id)
+        else:
+            referrer_id = 0
+    except TypeError:
+        referrer_id = 0
+
+    if referrer_id != 0:
+        userDatReferrer = asyncio.run(User.GetInfo(userDat.referrer_id))
+        addTrialTime = 30 * CONFIG['count_free_from_referrer'] * 60 * 60 * 24
+
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(
+            f"Update userss set subscription=subscription+{addTrialTime}, banned=false where tgid={referrer_id}")
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        BotCheck.send_message(userDat.referrer_id,
+                              f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
+                              reply_markup=asyncio.run(main_buttons(userDatReferrer, True)), parse_mode="HTML")
+
+        for admin in CONFIG["admin_tg_id"]:
+            BotCheck.send_message(admin,
+                                  f"Оплативший пользователь пришел от {userDat.username} ( {userDat.referrer_id} )",
+                                  parse_mode="HTML")
+
+
+def AddTimeToUserSync(tgid, timetoadd):
+    userdat = asyncio.run(User.GetInfo(tgid))
+
+    if int(userdat.subscription) < int(time.time()):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
+                      (str(int(time.time()) + timetoadd), userdat.tgid))
+        dbCur.execute(f"DELETE FROM notions where tgid=%s", (userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        asyncio.run(switchUserActivity(str(userdat.tgid), True))
+
+        BotCheck.send_message(userdat.tgid, e.emojize(
+            '<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support'),
+                              parse_mode="HTML", reply_markup=asyncio.run(main_buttons(userdat, True)))
+    else:
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s where tgid=%s",
+                      (str(int(userdat.subscription) + timetoadd), userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        asyncio.run(switchUserActivity(str(userdat.tgid), True))
+        BotCheck.send_message(userdat.tgid, e.emojize(
+            'Информация о подписке обновлена'), parse_mode="HTML",
+                              reply_markup=asyncio.run(main_buttons(userdat, True)))
+
+
+def getCostBySale(month):
+    cost = month * CONFIG['one_month_cost']
+    oneMonthCost = float(CONFIG['one_month_cost'])
+    perc3 = float(CONFIG['perc_3'])
+    perc6 = float(CONFIG['perc_6'])
+    perc12 = float(CONFIG['perc_12'])
+
+    if month == 3:
+        cost = oneMonthCost * perc3
+    elif month == 6:
+        cost = oneMonthCost * perc6
+    elif month == 12:
+        cost = oneMonthCost * perc12
+    elif month == 100:
+        cost = 60
+
+    return int(cost)
+
+
+def getSale(month):
+    cost = month * CONFIG['one_month_cost']
+    oneMonthCost = float(CONFIG['one_month_cost'])
+    perc3 = float(CONFIG['perc_3'])
+    perc6 = float(CONFIG['perc_6'])
+    perc12 = float(CONFIG['perc_12'])
+
+    if month == 3:
+        sale = 100 - round((oneMonthCost * perc3 * 100) / cost)
+    elif month == 6:
+        sale = 100 - round((oneMonthCost * perc6 * 100) / cost)
+    elif month == 12:
+        sale = 100 - round((oneMonthCost * perc12 * 100) / cost)
+    else:
+        sale = 0
+    return sale
+
+
+def paymentSuccess(paymentId):
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"UPDATE payments SET status='success' WHERE bill_id = %s", (paymentId,))
+    conn.commit()
+    dbCur.execute(f"SELECT * FROM payments where bill_id=%s", (paymentId,))
+    log = dbCur.fetchone()
+    dbCur.close()
+    conn.close()
+
+    tgid = log['tgid']
+    amount = log['amount']
+    addTimeSubscribe = log['time_to_add']
+    paymentsCount = 0
+
+    try:
+        # находим прошлые оплаты
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"select COUNT(*) as count from payments where tgid=%s and status='success'", (tgid,))
+        paymentsConn = dbCur.fetchone()
+        paymentsCount = paymentsConn['count']
+        dbCur.close()
+        conn.close()
+    except Exception as err:
+        print('***--- FOUND PAYMENTS ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    user_dat = asyncio.run(User.GetInfo(tgid))
+    try:
+        dateto = datetime.utcfromtimestamp(
+            int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
+            '%d.%m.%Y %H:%M')
+        BotCheck.send_message(tgid,
+                              e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
+                              reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)), parse_mode="HTML")
+    except Exception as err:
+        print('***--- PAY MESSAGE 1 ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    try:
+        AddTimeToUserSync(tgid, addTimeSubscribe)
+    except Exception as err:
+        print('***--- ADD TIME ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    try:
+        Butt_reffer = types.InlineKeyboardMarkup()
+        Butt_reffer.add(
+            types.InlineKeyboardButton(
+                e.emojize(f"Пригласить друга :wrapped_gift:"),
+                callback_data="Referrer"))
+        BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_message_2"]),
+                              reply_markup=Butt_reffer, parse_mode="HTML")
+    except Exception as err:
+        print('***--- PAY MESSAGE 2 ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    month = addTimeSubscribe / (30 * 24 * 60 * 60)
+    for admin in CONFIG["admin_tg_id"]:
+        BotCheck.send_message(admin,
+                              f"Новая оплата подписки от {user_dat.username} ( {user_dat.tgid} ) на <b>{month}</b> мес. : {amount} руб.",
+                              parse_mode="HTML")
+
+    try:
+        print(paymentsCount)
+        if paymentsCount <= 1:
+            addTrialForReferrerByUserIdSync(tgid)
+    except Exception as err:
+        print('***--- ADD TRIAL TO REFERRER AFTER PAY ERROR ---***')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
 
 @bot.message_handler(commands=['start'])
@@ -895,47 +1119,57 @@ async def Buy_month(call: types.CallbackQuery):
     user_dat = await User.GetInfo(call.from_user.id)
     payment_info = await user_dat.PaymentInfo()
 
-    Month_count = int(str(call.data).split(":")[1])
+    monthСount = int(str(call.data).split(":")[1])
     await bot.delete_message(call.message.chat.id, call.message.id)
 
-    bill = await bot.send_invoice(call.message.chat.id, f"Оплата VPN", f"VPN на {str(Month_count)} мес.", call.data,
-                                  currency="RUB", prices=[
-            types.LabeledPrice(f"VPN на {str(Month_count)} мес.", getCostBySale(Month_count) * 100)],
-                                  provider_token=CONFIG["tg_shop_token"])
+    if call.message.chat.id in CONFIG["admin_tg_id"]:
+        try:
+            price = getCostBySale(monthСount)
+            pay = await Pay(PAYMENT_SYSTEM_CODE).createPay(
+                tgid=call.message.chat.id,
+                currency="RUB",
+                label=f"VPN на {str(monthСount)} мес.",
+                price=price
+            )
+            payLink = pay['link']
+            payId = pay['id']
+
+            addTimeSubscribe = monthСount * 30 * 24 * 60 * 60
+            await user_dat.NewPay(
+                payId,
+                price,
+                addTimeSubscribe,
+                call.message.chat.id,
+                Pay.STATUS_CREATED
+            )
+
+            payLinkButton = types.InlineKeyboardMarkup(row_width=1)
+            payLinkButton.add(
+                types.InlineKeyboardButton(emoji.emojize(":credit_card: Оплатить"), url=payLink)
+            )
+
+            if monthСount == 1:
+                monthText = 'месяц'
+            elif monthСount == 12:
+                monthСount = 1
+                monthText = 'год'
+            else:
+                monthText = 'месяцев'
+
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
+                                   parse_mode="HTML", reply_markup=payLinkButton)
+        except Exception as e:
+            print(e)
+    else:
+        price = getCostBySale(monthСount) * 100
+
+        bill = await bot.send_invoice(call.message.chat.id, f"Оплата VPN", f"VPN на {str(monthСount)} мес.", call.data,
+                                      currency="RUB", prices=[
+                types.LabeledPrice(f"VPN на {str(monthСount)} мес.", getCostBySale(monthСount) * 100)],
+                                      provider_token=CONFIG["tg_shop_token"])
 
     await bot.answer_callback_query(call.id)
-
-
-async def AddTimeToUser(tgid, timetoadd):
-    userdat = await User.GetInfo(tgid)
-
-    if int(userdat.subscription) < int(time.time()):
-        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-        dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
-                      (str(int(time.time()) + timetoadd), userdat.tgid))
-        dbCur.execute(f"DELETE FROM notions where tgid=%s", (userdat.tgid))
-        conn.commit()
-        dbCur.close()
-        conn.close()
-
-        await switchUserActivity(str(userdat.tgid), True)
-
-        await bot.send_message(userdat.tgid, e.emojize(
-            '<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам @vpnducks_support'),
-                               parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
-    else:
-        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-        dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"Update userss set subscription = %s where tgid=%s",
-                      (str(int(userdat.subscription) + timetoadd), userdat.tgid))
-        conn.commit()
-        dbCur.close()
-        conn.close()
-
-        await switchUserActivity(str(userdat.tgid), True)
-        await bot.send_message(userdat.tgid, e.emojize(
-            'Информация о подписке обновлена'), parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
 
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
@@ -951,43 +1185,6 @@ async def checkout(pre_checkout_query):
     else:
         await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
                                             error_message="Оплата не прошла, попробуйте еще раз!")
-
-
-def getCostBySale(month):
-    cost = month * CONFIG['one_month_cost']
-    oneMonthCost = float(CONFIG['one_month_cost'])
-    perc3 = float(CONFIG['perc_3'])
-    perc6 = float(CONFIG['perc_6'])
-    perc12 = float(CONFIG['perc_12'])
-
-    if month == 3:
-        cost = oneMonthCost * perc3
-    elif month == 6:
-        cost = oneMonthCost * perc6
-    elif month == 12:
-        cost = oneMonthCost * perc12
-    elif month == 100:
-        cost = 60
-
-    return int(cost)
-
-
-def getSale(month):
-    cost = month * CONFIG['one_month_cost']
-    oneMonthCost = float(CONFIG['one_month_cost'])
-    perc3 = float(CONFIG['perc_3'])
-    perc6 = float(CONFIG['perc_6'])
-    perc12 = float(CONFIG['perc_12'])
-
-    if month == 3:
-        sale = 100 - round((oneMonthCost * perc3 * 100) / cost)
-    elif month == 6:
-        sale = 100 - round((oneMonthCost * perc6 * 100) / cost)
-    elif month == 12:
-        sale = 100 - round((oneMonthCost * perc12 * 100) / cost)
-    else:
-        sale = 0
-    return sale
 
 
 @bot.message_handler(content_types=['successful_payment'])
@@ -1084,7 +1281,6 @@ bot.add_custom_filter(asyncio_filters.StateFilter(bot))
 
 def checkTime():
     global e
-    BotChecking = TeleBot(BOTAPIKEY)
     while True:
         try:
             time.sleep(15)
@@ -1126,9 +1322,9 @@ def checkTime():
                             Butt_main.add(
                                 types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
 
-                        BotChecking.send_message(i['tgid'],
-                                                 texts_for_bot["ended_sub_message"],
-                                                 reply_markup=Butt_main, parse_mode="HTML")
+                        BotCheck.send_message(i['tgid'],
+                                              texts_for_bot["ended_sub_message"],
+                                              reply_markup=Butt_main, parse_mode="HTML")
 
                         Butt_reffer = types.InlineKeyboardMarkup()
                         Butt_reffer.add(
@@ -1139,9 +1335,9 @@ def checkTime():
                             types.InlineKeyboardButton(
                                 e.emojize(f"Пригласить друга :wrapped_gift:"),
                                 callback_data="Referrer"))
-                        BotChecking.send_message(i['tgid'],
-                                                 texts_for_bot["ended_sub_message_2"],
-                                                 reply_markup=Butt_reffer, parse_mode="HTML")
+                        BotCheck.send_message(i['tgid'],
+                                              texts_for_bot["ended_sub_message_2"],
+                                              reply_markup=Butt_reffer, parse_mode="HTML")
 
                     elif remained_time > 0 and remained_time <= 7200:
                         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -1163,9 +1359,9 @@ def checkTime():
                                 types.InlineKeyboardButton(
                                     e.emojize(f"Пригласить друга :wrapped_gift:"),
                                     callback_data="Referrer"))
-                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
-                                                     reply_markup=Butt_reffer,
-                                                     parse_mode="HTML")
+                            BotCheck.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_2hours"],
+                                                  reply_markup=Butt_reffer,
+                                                  parse_mode="HTML")
 
                             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -1190,8 +1386,8 @@ def checkTime():
                             Butt_reffer.add(
                                 types.InlineKeyboardButton(e.emojize(f"Продлить подписку :money_bag:"),
                                                            callback_data="PayBlock"))
-                            BotChecking.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
-                                                     reply_markup=Butt_reffer, parse_mode="HTML")
+                            BotCheck.send_message(i['tgid'], texts_for_bot["alert_to_renew_sub_24hours"],
+                                                  reply_markup=Butt_reffer, parse_mode="HTML")
 
                             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -1210,6 +1406,7 @@ def checkTime():
                         dbCur.close()
                         conn.close()
                     pass
+
         except ApiTelegramException as exception:
             print("ApiTelegramException")
             print(exception.description)
@@ -1222,9 +1419,48 @@ def checkTime():
             pass
 
 
+def checkPayments():
+    while True:
+        try:
+            time.sleep(10)
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"DELETE FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 15 MINUTE")
+            conn.commit()
+            dbCur.execute(f"SELECT * FROM payments WHERE status <> 'success'")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                try:
+                    paymentId = i['bill_id']
+                    paymentData = Pay(PAYMENT_SYSTEM_CODE).findPay(paymentId)
+                    if paymentData and paymentData['success']:
+                        if paymentData['payment'].status == 'succeeded':
+                            paymentSuccess(paymentId)
+
+                except ApiTelegramException as exception:
+                    if (exception.description == 'Forbidden: bot was blocked by the user'):
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(f"Update userss set blocked=true where tgid=%s", (i['tgid']))
+                        conn.commit()
+                        dbCur.close()
+                        conn.close()
+                    pass
+        except Exception as err:
+            print('NOT AWAIT ERROR')
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
     threadcheckTime.start()
+    threadcheckPayments = threading.Thread(target=checkPayments, name="checkPayments1")
+    threadcheckPayments.start()
 
     try:
         asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=90, timeout=60))

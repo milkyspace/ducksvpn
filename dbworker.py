@@ -97,11 +97,11 @@ class User:
         dbCur.close()
         conn.close()
 
-    async def NewPay(self, bill_id, summ, time_to_add, mesid):
+    async def NewPay(self, bill_id, summ, time_to_add, mesid, status='success'):
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid) values (%s,%s,%s,%s,%s)",
-                      (self.tgid, str(bill_id), summ, int(time_to_add), str(mesid)))
+        dbCur.execute(f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid,status) values (%s,%s,%s,%s,%s,%s)",
+                      (self.tgid, str(bill_id), summ, int(time_to_add), str(mesid), status))
         conn.commit()
         dbCur.close()
         conn.close()
