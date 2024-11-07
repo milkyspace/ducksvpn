@@ -1124,52 +1124,53 @@ async def Buy_month(call: types.CallbackQuery):
         monthСount = 1
     await bot.delete_message(call.message.chat.id, call.message.id)
 
-    if call.message.chat.id in CONFIG["admin_tg_id"]:
-        try:
-            price = getCostBySale(monthСount)
-            pay = await Pay(PAYMENT_SYSTEM_CODE).createPay(
-                tgid=call.message.chat.id,
-                currency="RUB",
-                label=f"VPN на {str(monthСount)} мес.",
-                price=price
-            )
-            payLink = pay['link']
-            payId = pay['id']
+    # if call.message.chat.id in CONFIG["admin_tg_id"]:
+    try:
+        price = getCostBySale(monthСount)
+        pay = await Pay(PAYMENT_SYSTEM_CODE).createPay(
+            tgid=call.message.chat.id,
+            currency="RUB",
+            label=f"VPN на {str(monthСount)} мес.",
+            price=price
+        )
+        payLink = pay['link']
+        payId = pay['id']
 
-            addTimeSubscribe = monthСount * 30 * 24 * 60 * 60
-            await user_dat.NewPay(
-                payId,
-                price,
-                addTimeSubscribe,
-                call.message.chat.id,
-                Pay.STATUS_CREATED
-            )
+        addTimeSubscribe = monthСount * 30 * 24 * 60 * 60
+        await user_dat.NewPay(
+            payId,
+            price,
+            addTimeSubscribe,
+            call.message.chat.id,
+            Pay.STATUS_CREATED
+        )
 
-            payLinkButton = types.InlineKeyboardMarkup(row_width=1)
-            payLinkButton.add(
-                types.InlineKeyboardButton(emoji.emojize(":credit_card: Оплатить"), url=payLink)
-            )
+        payLinkButton = types.InlineKeyboardMarkup(row_width=1)
+        payLinkButton.add(
+            types.InlineKeyboardButton(emoji.emojize(":credit_card: Оплатить"), url=payLink)
+        )
 
-            if monthСount == 1:
-                monthText = 'месяц'
-            elif monthСount == 12:
-                monthСount = 1
-                monthText = 'год'
-            else:
-                monthText = 'месяцев'
+        if monthСount == 1:
+            monthText = 'месяц'
+        elif monthСount == 12:
+            monthСount = 1
+            monthText = 'год'
+        else:
+            monthText = 'месяцев'
 
-            await bot.send_message(chat_id=call.message.chat.id,
-                                   text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
-                                   parse_mode="HTML", reply_markup=payLinkButton)
-        except Exception as e:
-            print(e)
-    else:
-        price = getCostBySale(monthСount) * 100
-
-        bill = await bot.send_invoice(call.message.chat.id, f"Оплата VPN", f"VPN на {str(monthСount)} мес.", call.data,
-                                      currency="RUB", prices=[
-                types.LabeledPrice(f"VPN на {str(monthСount)} мес.", getCostBySale(monthСount) * 100)],
-                                      provider_token=CONFIG["tg_shop_token"])
+        await bot.send_message(chat_id=call.message.chat.id,
+                               text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
+                               parse_mode="HTML", reply_markup=payLinkButton)
+    except Exception as e:
+        print('payment error')
+        print(e)
+    # else:
+    # price = getCostBySale(monthСount) * 100
+    #
+    # bill = await bot.send_invoice(call.message.chat.id, f"Оплата VPN", f"VPN на {str(monthСount)} мес.", call.data,
+    #                               currency="RUB", prices=[
+    #         types.LabeledPrice(f"VPN на {str(monthСount)} мес.", getCostBySale(monthСount) * 100)],
+    #                               provider_token=CONFIG["tg_shop_token"])
 
     await bot.answer_callback_query(call.id)
 
