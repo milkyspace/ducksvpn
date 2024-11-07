@@ -1028,7 +1028,7 @@ async def Work_with_Message(m: types.Message):
             types.InlineKeyboardButton(e.emojize("💫 Обновить информацию о подписке"),
                                        callback_data="Help:update"),
             types.InlineKeyboardButton(e.emojize(":woman_technologist: Чат с поддержкой"), url=SUPPORT_LINK),
-            types.InlineKeyboardButton(e.emojize("❓ Часто задаваемые вопросы (FAQ)"), callback_data="Help:FAQ"),
+            types.InlineKeyboardButton(e.emojize("❓ Часто задаваемые вопросы (FAQ)"), url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
         )
         if user_dat.type == 'amnezia':
