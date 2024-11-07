@@ -298,32 +298,21 @@ async def AddTimeToUser(tgid, timetoadd):
 def addTrialForReferrerByUserIdSync(userId):
     userDat = asyncio.run(User.GetInfo(userId))
     try:
-        if userDat.referrer_id and userDat.referrer_id > 0:
-            referrer_id = int(userDat.referrer_id)
-        else:
-            referrer_id = 0
+        referrer_id = userDat.referrer_id if userDat.referrer_id else 0
     except TypeError:
         referrer_id = 0
 
     if referrer_id != 0:
         userDatReferrer = asyncio.run(User.GetInfo(userDat.referrer_id))
         addTrialTime = 30 * CONFIG['count_free_from_referrer'] * 60 * 60 * 24
-
-        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-        dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(
-            f"Update userss set subscription=subscription+{addTrialTime}, banned=false where tgid={referrer_id}")
-        conn.commit()
-        dbCur.close()
-        conn.close()
-
+        AddTimeToUserSync(referrer_id, addTrialTime)
         BotCheck.send_message(userDat.referrer_id,
                               f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
                               reply_markup=asyncio.run(main_buttons(userDatReferrer, True)), parse_mode="HTML")
 
         for admin in CONFIG["admin_tg_id"]:
             BotCheck.send_message(admin,
-                                  f"Оплативший пользователь пришел от {userDat.username} ( {userDat.referrer_id} )",
+                                  f"Оплативший пользователь {userDat.username} ({userDat.tgid}) пришел от {userDatReferrer.username} ( {userDatReferrer.tgid} )",
                                   parse_mode="HTML")
 
 
@@ -470,7 +459,6 @@ def paymentSuccess(paymentId):
                               parse_mode="HTML")
 
     try:
-        print(paymentsCount)
         if paymentsCount <= 1:
             addTrialForReferrerByUserIdSync(tgid)
     except Exception as err:
@@ -1072,7 +1060,7 @@ async def Init(call: types.CallbackQuery):
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
     await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
-        f"Запрос отправлен. Пожалуйста, подождите, ваш ключ генерируется :winking_face:"), parse_mode="HTML")
+        f"Пожалуйста, подождите, ваш персональный ключ генерируется :locked_with_key:"), parse_mode="HTML")
     await addUser(user_dat.tgid, user_dat.username)
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await bot.answer_callback_query(call.id)
