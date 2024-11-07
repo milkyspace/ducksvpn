@@ -1434,7 +1434,7 @@ def checkTime():
 def checkPayments():
     while True:
         try:
-            time.sleep(10)
+            time.sleep(15)
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(f"DELETE FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 15 MINUTE")
