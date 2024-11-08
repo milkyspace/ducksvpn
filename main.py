@@ -253,8 +253,11 @@ async def addTrialForReferrerByUserId(userId):
         dbCur.close()
         conn.close()
 
+        userName = userDat.fullname
+        if userDat.username:
+            userName = f"{userName} ({userDat.username})"
         await bot.send_message(userDat.referrer_id,
-                               f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
+                               f"<b>Поздравляем!</b>\nПользователь {userName}, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
                                reply_markup=await main_buttons(userDatReferrer, True), parse_mode="HTML")
 
         for admin in CONFIG["admin_tg_id"]:
