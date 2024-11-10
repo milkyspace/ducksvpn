@@ -26,6 +26,7 @@ Install the dependencies and start the server.
 apt-get install git -y
 git clone https://github.com/milkyspace/ducksvpn.git
 cd ducksvpn
+mkdir backup
 chmod u+x install.sh
 ./install.sh
 
