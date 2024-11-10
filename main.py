@@ -999,13 +999,8 @@ async def Work_with_Message(m: types.Message):
             return
 
         if e.demojize(m.text) == "Перезагрузить бот :optical_disk:":
-            shell = subprocess.Popen(['bash'], stdin=subprocess.PIPE)
-            shell.stdin.write(b'sudo systemctl restart mysql\n')
-            shell.stdin.flush()
-            shell.stdin.write(b'dvpn\n')
-            shell.stdin.flush()
-            shell.kill()
-
+            subprocess.call('sudo systemctl restart mysql\n', shell=True)
+            subprocess.call('dvpn\n', shell=True)
             await bot.send_message(m.from_user.id, "Бот перезагружен",
                                    reply_markup=await buttons.admin_buttons_back())
             return
