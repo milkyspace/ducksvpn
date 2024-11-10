@@ -96,6 +96,12 @@ nano .env # or vim .env
 **SERVER_MANAGER_URL** is url for server manager (for example DSM http://{IP}/api)
 **SERVER_MANAGER_EMAIL** is login for server manager
 **SERVER_MANAGER_PASSWORD** is password for server manager
+**PAYMENT_SYSTEM_CODE** is payment system code (yookassa)
+**YOOKASSA_SHOP_ID** is YooKassa shop id
+**YOOKASSA_SECRET_KEY** is YooKassa API secret key
+**SUPPORT_LINK** is link to support
+**SUPPORT_USERNAME** is tg username of support (with @)
+**BACKUP_DIR** is dir for backups
 
 Now you can start the telegram bot
 

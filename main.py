@@ -12,6 +12,8 @@ import traceback
 import asyncio
 import pymysql
 import pymysql.cursors
+import subprocess
+from datetime import datetime
 from telebot.apihelper import ApiTelegramException
 from datetime import datetime
 from telebot import TeleBot
@@ -54,6 +56,7 @@ CONFIG = {
     "payment_system_code": os.getenv("PAYMENT_SYSTEM_CODE"),
     "support_link": os.getenv("SUPPORT_LINK"),
     "support_username": os.getenv("SUPPORT_USERNAME"),
+    "backup_dir": os.getenv("BACKUP_DIR"),
 }
 
 dbworker.CONFIG = CONFIG
@@ -995,6 +998,18 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(m.text) == "Перезагрузить бот :optical_disk:":
+            shell = subprocess.Popen(['bash'], stdin=subprocess.PIPE)
+            shell.stdin.write(b'sudo systemctl restart mysql\n')
+            shell.stdin.flush()
+            shell.stdin.write(b'dvpn\n')
+            shell.stdin.flush()
+            shell.kill()
+
+            await bot.send_message(m.from_user.id, "Бот перезагружен",
+                                   reply_markup=await buttons.admin_buttons_back())
+            return
+
         if e.demojize(m.text) == "Добавить пользователя :plus:":
             await bot.send_message(m.from_user.id,
                                    "Введите имя для нового пользователя!\nМожно использовать только латинские символы и арабские цифры.",
@@ -1302,7 +1317,7 @@ def checkTime():
     global e
     while True:
         try:
-            time.sleep(15)
+            time.sleep(20)
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -1492,14 +1507,35 @@ def checkPayments():
             pass
 
 
+def checkBackup():
+    while True:
+        try:
+            backupDir = CONFIG["backup_dir"]
+            dateString = f'{datetime.now():%Y_%m_%d_%H_%M_%S%z}'
+            subprocess.call(
+                'find ' + backupDir + '* -mtime +5 -exec rm {} \;\n',
+                shell=True)
+            subprocess.call(
+                'mysqldump -v -h localhost -u ' + DBUSER + ' -p' + DBPASSWORD + ' --skip-comments ducksvpn > ' + backupDir + '/dump_' + dateString + '.sql\n',
+                shell=True)
+            time.sleep(43200)
+        except Exception as err:
+            print('BACKUP ERROR')
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
     threadcheckTime.start()
     threadcheckPayments = threading.Thread(target=checkPayments, name="checkPayments1")
     threadcheckPayments.start()
+    threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
+    threadcheckBackup.start()
 
     try:
-        asyncio.run(bot.polling(non_stop=True, interval=0, request_timeout=90, timeout=60))
+        asyncio.run(bot.infinity_polling(request_timeout=90, timeout=60))
     except Exception as err:
         print('asyncio error')
         print(err)
