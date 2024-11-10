@@ -1031,7 +1031,8 @@ async def Work_with_Message(m: types.Message):
             types.InlineKeyboardButton(e.emojize("💫 Обновить информацию о подписке"),
                                        callback_data="Help:update"),
             types.InlineKeyboardButton(e.emojize(":woman_technologist: Чат с поддержкой"), url=SUPPORT_LINK),
-            types.InlineKeyboardButton(e.emojize("❓ Часто задаваемые вопросы (FAQ)"), url="https://teletype.in/@vpnducks/faq"),
+            types.InlineKeyboardButton(e.emojize("❓ Часто задаваемые вопросы (FAQ)"),
+                                       url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
         )
         if user_dat.type == 'amnezia':
@@ -1147,13 +1148,6 @@ async def Buy_month(call: types.CallbackQuery):
         payId = pay['id']
 
         addTimeSubscribe = monthСount * 30 * 24 * 60 * 60
-        await user_dat.NewPay(
-            payId,
-            price,
-            addTimeSubscribe,
-            call.message.chat.id,
-            Pay.STATUS_CREATED
-        )
 
         payLinkButton = types.InlineKeyboardMarkup(row_width=1)
         payLinkButton.add(
@@ -1168,9 +1162,20 @@ async def Buy_month(call: types.CallbackQuery):
         else:
             monthText = 'месяцев'
 
-        await bot.send_message(chat_id=call.message.chat.id,
-                               text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
-                               parse_mode="HTML", reply_markup=payLinkButton)
+        messageSend = await bot.send_message(chat_id=call.message.chat.id,
+                                             text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
+                                             parse_mode="HTML", reply_markup=payLinkButton)
+
+        messageId = messageSend.message_id
+
+        await user_dat.NewPay(
+            payId,
+            price,
+            addTimeSubscribe,
+            call.message.chat.id,
+            Pay.STATUS_CREATED,
+            messageId
+        )
     except Exception as e:
         print('payment error')
         print(e)
@@ -1438,6 +1443,21 @@ def checkPayments():
     while True:
         try:
             time.sleep(15)
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"SELECT * FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 1 MINUTE")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+            for i in log:
+                tgId = i['tgid']
+                messageId = i['message_id']
+                if messageId:
+                    try:
+                        BotCheck.delete_message(tgId, messageId)
+                    except:
+                        pass
+
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(f"DELETE FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 25 MINUTE")
