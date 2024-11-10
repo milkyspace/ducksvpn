@@ -998,10 +998,9 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
-        if e.demojize(m.text) == "Перезагрузить бот :optical_disk:":
+        if e.demojize(m.text) == "Перезагрузить базу :optical_disk:":
             subprocess.call('sudo systemctl restart mysql\n', shell=True)
-            subprocess.call('sudo systemctl stop ducksVpnTelegram && sudo systemctl start ducksVpnTelegram && sudo systemctl status ducksVpnTelegram\n', shell=True)
-            await bot.send_message(m.from_user.id, "Бот перезагружен",
+            await bot.send_message(m.from_user.id, "База перезагружена",
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
