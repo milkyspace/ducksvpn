@@ -1445,7 +1445,7 @@ def checkPayments():
             time.sleep(15)
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 1 MINUTE")
+            dbCur.execute(f"SELECT * FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 5 MINUTE")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
