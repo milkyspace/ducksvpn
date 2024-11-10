@@ -1141,7 +1141,7 @@ async def Buy_month(call: types.CallbackQuery):
         pay = await Pay(PAYMENT_SYSTEM_CODE).createPay(
             tgid=call.message.chat.id,
             currency="RUB",
-            label=f"VPN на {str(monthСount)} мес.",
+            label=f"VPN на {str(monthСount)} мес. ({call.message.chat.id})",
             price=price
         )
         payLink = pay['link']
