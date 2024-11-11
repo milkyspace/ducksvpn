@@ -1146,7 +1146,10 @@ async def Buy_month(call: types.CallbackQuery):
 
     monthСount = int(str(call.data).split(":")[1])
 
-    await bot.delete_message(call.message.chat.id, call.message.id)
+    try:
+        await bot.delete_message(call.message.chat.id, call.message.id)
+    except:
+        pass
 
     # if call.message.chat.id in CONFIG["admin_tg_id"]:
     try:
