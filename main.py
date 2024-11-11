@@ -192,7 +192,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                    reply_markup=await main_buttons(user_dat, True))
         else:
             await bot.send_message(user_dat.tgid,
-                                   emoji.emojize(f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
+                                   emoji.emojize(
+                                       f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
                                    reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
     elif type == 'amnezia':
         try:
@@ -227,7 +228,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
             else:
                 await bot.send_message(user_dat.tgid,
-                                       emoji.emojize(f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
+                                       emoji.emojize(
+                                           f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
                                        reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
         except:
             await bot.send_message(user_dat.tgid,
@@ -286,7 +288,7 @@ async def AddTimeToUser(tgid, timetoadd):
         await switchUserActivity(str(userdat.tgid), True)
 
         await bot.send_message(userdat.tgid, e.emojize(
-            f'<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
+            f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
                                parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
     else:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -325,7 +327,8 @@ def addTrialForReferrerByUserIdSync(userId):
 
 def AddTimeToUserSync(tgid, timetoadd):
     userdat = asyncio.run(User.GetInfo(tgid))
-
+    if userdat.subscription == None:
+        return
     if int(userdat.subscription) < int(time.time()):
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -339,7 +342,7 @@ def AddTimeToUserSync(tgid, timetoadd):
         asyncio.run(switchUserActivity(str(userdat.tgid), True))
 
         BotCheck.send_message(userdat.tgid, e.emojize(
-            f'<b>Ваша конфигурация была обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
+            f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
                               parse_mode="HTML", reply_markup=asyncio.run(main_buttons(userdat, True)))
     else:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -677,7 +680,7 @@ async def Work_with_Message(m: types.Message):
         all_time += minutes * 60
         all_time += hours * 60 * 60
         all_time += days * 60 * 60 * 24
-        await AddTimeToUser(tgid, all_time)
+        AddTimeToUserSync(tgid, all_time)
 
         userDat = await User.GetInfo(tgid)
         await bot.send_message(chat_id=tgid,
