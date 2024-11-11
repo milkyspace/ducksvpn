@@ -192,7 +192,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                    reply_markup=await main_buttons(user_dat, True))
         else:
             await bot.send_message(user_dat.tgid,
-                                   f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}",
+                                   emoji.emojize(f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
                                    reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
     elif type == 'amnezia':
         try:
@@ -227,7 +227,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                             visible_file_name=f"vpnducks_{str(user_dat.tgid)}.conf")
             else:
                 await bot.send_message(user_dat.tgid,
-                                       f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}",
+                                       emoji.emojize(f"Пожалуйста, попробуйте еще раз :smiling_face_with_smiling_eyes:\n\rЗа помощью обратитесь к {SUPPORT_USERNAME}"),
                                        reply_markup=await main_buttons(user_dat, True), parse_mode="HTML")
         except:
             await bot.send_message(user_dat.tgid,
