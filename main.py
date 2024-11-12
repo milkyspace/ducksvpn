@@ -311,18 +311,19 @@ def addTrialForReferrerByUserIdSync(userId):
     except TypeError:
         referrer_id = 0
 
-    if referrer_id != 0:
+    if referrer_id and referrer_id != 0:
         userDatReferrer = asyncio.run(User.GetInfo(userDat.referrer_id))
-        addTrialTime = 30 * CONFIG['count_free_from_referrer'] * 60 * 60 * 24
-        AddTimeToUserSync(referrer_id, addTrialTime)
-        BotCheck.send_message(userDat.referrer_id,
-                              f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
-                              reply_markup=asyncio.run(main_buttons(userDatReferrer, True)), parse_mode="HTML")
+        if userDatReferrer.subscription != None:
+            addTrialTime = 30 * CONFIG['count_free_from_referrer'] * 60 * 60 * 24
+            AddTimeToUserSync(referrer_id, addTrialTime)
+            BotCheck.send_message(userDat.referrer_id,
+                                  f"<b>Поздравляем!</b>\nПользователь, пришедший по вашей ссылке, оплатил подписку, вам добавлен <b>+1 месяц</b> бесплатного доступа",
+                                  reply_markup=asyncio.run(main_buttons(userDatReferrer, True)), parse_mode="HTML")
 
-        for admin in CONFIG["admin_tg_id"]:
-            BotCheck.send_message(admin,
-                                  f"Оплативший пользователь {userDat.username} ({userDat.tgid}) пришел от {userDatReferrer.username} ( {userDatReferrer.tgid} )",
-                                  parse_mode="HTML")
+            for admin in CONFIG["admin_tg_id"]:
+                BotCheck.send_message(admin,
+                                      f"Оплативший пользователь {userDat.username} ({userDat.tgid}) пришел от {userDatReferrer.username} ( {userDatReferrer.tgid} )",
+                                      parse_mode="HTML")
 
 
 def AddTimeToUserSync(tgid, timetoadd):
@@ -1443,22 +1444,7 @@ def checkTime():
                         conn.close()
                     pass
 
-        except ApiTelegramException as exception:
-            print("ApiTelegramException")
-            print(exception.description)
-            print(traceback.format_exc())
-            pass
-        except Exception as err:
-            print('NOT AWAIT ERROR')
-            print(err)
-            print(traceback.format_exc())
-            pass
-
-
-def checkPayments():
-    while True:
-        try:
-            time.sleep(20)
+            # payments
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(f"SELECT * FROM payments WHERE status <> 'success' and time < NOW() - INTERVAL 55 MINUTE")
@@ -1500,6 +1486,12 @@ def checkPayments():
                         dbCur.close()
                         conn.close()
                     pass
+
+        except ApiTelegramException as exception:
+            print("ApiTelegramException")
+            print(exception.description)
+            print(traceback.format_exc())
+            pass
         except Exception as err:
             print('NOT AWAIT ERROR')
             print(err)
@@ -1529,8 +1521,6 @@ def checkBackup():
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
     threadcheckTime.start()
-    threadcheckPayments = threading.Thread(target=checkPayments, name="checkPayments1")
-    threadcheckPayments.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
 

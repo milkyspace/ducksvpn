@@ -11,7 +11,7 @@ async def main_buttons(user: User, wasUpdate = None):
         user = await User.GetInfo(user.tgid)
 
     Butt_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    if user.subscription != "none":
+    if user.subscription != "none" and user.subscription != None:
         dateto = datetime.utcfromtimestamp(int(user.subscription)+CONFIG["UTC_time"]*3600).strftime('%d.%m.%Y %H:%M')
         timenow = int(time.time())
         if int(user.subscription)<timenow:
