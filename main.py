@@ -680,7 +680,7 @@ async def Work_with_Message(m: types.Message):
         all_time += minutes * 60
         all_time += hours * 60 * 60
         all_time += days * 60 * 60 * 24
-        AddTimeToUserSync(tgid, all_time)
+        await AddTimeToUser(tgid, all_time)
 
         userDat = await User.GetInfo(tgid)
         await bot.send_message(chat_id=tgid,
