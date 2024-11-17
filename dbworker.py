@@ -134,7 +134,7 @@ class User:
     async def GetAllUsers(self):
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"SELECT * FROM userss")
+        dbCur.execute(f"SELECT * FROM userss where blocked=false")
         log = dbCur.fetchall()
         dbCur.close()
         conn.close()
