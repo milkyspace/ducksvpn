@@ -1018,7 +1018,8 @@ async def Work_with_Message(m: types.Message):
                     print(traceback.format_exc())
                     pass
 
-            await bot.send_message(m.from_user.id, f"Сообщения отправлены ({len(allusers)} пользователей)", reply_markup=await buttons.admin_buttons())
+            await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+            await bot.send_message(m.from_user.id, f"{len(allusers)} пользователям", reply_markup=await buttons.admin_buttons())
 
             return
 
