@@ -996,6 +996,32 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(m.text) == "Отправить напоминание о службе поддержки :pencil:":
+            user_dat = await User.GetInfo(m.from_user.id)
+            allusers = await user_dat.GetAllUsers()
+
+            for i in allusers:
+                try:
+                    supportButtons = types.InlineKeyboardMarkup(row_width=1)
+                    supportButtons.add(
+                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                                   url=SUPPORT_LINK),
+                        types.InlineKeyboardButton(emoji.emojize(f"Пригласить друга :wrapped_gift:"),
+                                                   callback_data="Referrer"),
+                    )
+                    await bot.send_message(i['tgid'], emoji.emojize(texts_for_bot["notify_about_support"]),
+                                           parse_mode="HTML",
+                                           reply_markup=supportButtons)
+                except Exception as err:
+                    print("sendMessageAboutSupportToAllUser")
+                    print(err)
+                    print(traceback.format_exc())
+                    pass
+
+            await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+
+            return
+
         if e.demojize(m.text) == "Поиск пользователя по никнейму :magnifying_glass_tilted_left:":
             await bot.set_state(m.from_user.id, MyStates.findUsersByName)
             await bot.send_message(m.from_user.id, "Введите никнейм пользователя:",
