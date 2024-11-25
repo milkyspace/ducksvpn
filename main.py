@@ -433,7 +433,7 @@ def paymentSuccess(paymentId):
             int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
             '%d.%m.%Y %H:%M')
         BotCheck.send_message(tgid,
-                              e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
+                              e.emojize(texts_for_bot["success_pay_message"]),
                               reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)), parse_mode="HTML")
     except Exception as err:
         print('***--- PAY MESSAGE 1 ERROR ---***')
@@ -1019,7 +1019,8 @@ async def Work_with_Message(m: types.Message):
                     pass
 
             await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
-            await bot.send_message(m.from_user.id, f"{len(allusers)} пользователям", reply_markup=await buttons.admin_buttons())
+            await bot.send_message(m.from_user.id, f"{len(allusers)} пользователям",
+                                   reply_markup=await buttons.admin_buttons())
 
             return
 
@@ -1286,7 +1287,7 @@ async def got_payment(m):
             int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
             '%d.%m.%Y %H:%M')
         await bot.send_message(m.from_user.id,
-                               e.emojize(texts_for_bot["success_pay_message"] + f" <b>{dateto} МСК</b>"),
+                               e.emojize(texts_for_bot["success_pay_message"]),
                                reply_markup=await buttons.main_buttons(user_dat, True), parse_mode="HTML")
     except Exception as err:
         print('***--- PAY MESSAGE 1 ERROR ---***')
