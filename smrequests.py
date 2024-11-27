@@ -79,9 +79,12 @@ async def addUser(userid, username, type=''):
     return False
 
 
-async def getConnectionLinks(tgId):
+async def getConnectionLinks(tgId, keyType = 'default'):
     token = f"Bearer {await getToken()}"
-    response = requests.get(f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getLink",
+    requestAddress = f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getLink/{keyType}"
+    if keyType == 'TikTok':
+        requestAddress = requestAddress + '/' + keyType
+    response = requests.get(requestAddress,
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
                                      "Authorization": token})

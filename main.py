@@ -155,7 +155,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
     tgId = str(user_dat.tgid)
 
     if type == 'xui':
-        connectionLinks = await getConnectionLinks(tgId)
+        connectionLinks = await getConnectionLinks(tgId, device)
         if connectionLinks['success']:
             data = connectionLinks['data']
             link = data['link']
@@ -1076,6 +1076,7 @@ async def Work_with_Message(m: types.Message):
             types.InlineKeyboardButton(e.emojize("❓ Часто задаваемые вопросы (FAQ)"),
                                        url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
+            types.InlineKeyboardButton(e.emojize(":video_camera: Не работает TikTok?"), callback_data="Help:TIKTOK"),
         )
         if user_dat.type == 'amnezia':
             helpButtons.add(
@@ -1141,6 +1142,17 @@ async def Init(call: types.CallbackQuery):
             texts_for_bot["prices"]
             + f"Если у вас остались вопросы, напишите в поддержку {SUPPORT_USERNAME}, мы всегда на связи и рады вам помочь 🙌🏻."),
                                parse_mode="HTML")
+    elif command == 'TIKTOK':
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
+            texts_for_bot["prices"]
+            + f"Для корректной работы TikTok попробуйте, пожалуйста, переключиться на другие серверы."
+              f"\n\rДля этого вам необходимо удалить ваш ключ из приложения и добавить новый, который мы вам отправили следующим сообщением ниже."
+              f"\n\rЧто-то не получилось или этот способ не помог? Напишите {SUPPORT_USERNAME}, мы оперативно поможем 🙌🏻"),
+                               parse_mode="HTML")
+
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
+            f"Пожалуйста, подождите, ваш персональный ключ для TikTok генерируется :locked_with_key:"), parse_mode="HTML")
+        await sendConfigAndInstructions(user_dat.tgid, 'tiktok', 'xui')
     else:
         await bot.send_message(user_dat.tgid, e.emojize(f'Напишите нам {SUPPORT_USERNAME}'), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat, True))
