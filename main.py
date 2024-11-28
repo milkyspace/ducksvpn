@@ -92,6 +92,7 @@ class MyStates(StatesGroup):
     sendMessageToAmneziaUser = State()
     sendMessageToAllInactiveUser = State()
     findUsersByName = State()
+    switchActiveUserManual = State()
     editUser = State()
     editUserResetTime = State()
 
@@ -877,6 +878,44 @@ async def Work_with_Message(m: types.Message):
     return
 
 
+@bot.message_handler(state=MyStates.switchActiveUserManual, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    user_dat = await User.GetInfo(m.from_user.id)
+    allusers = await user_dat.GetAllUsers()
+    for i in allusers:
+        if i['username'] == m.text or i['username'] == '@' + m.text or i['tgid'] == m.text:
+            try:
+                await bot.send_message(m.from_user.id, "Пользователь найден:",
+                                       reply_markup=await buttons.admin_buttons())
+                await bot.send_message(m.from_user.id, f"{i['tgid']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"{i['username']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id, f"Полное имя: {i['fullname']}", parse_mode="HTML")
+                await bot.send_message(m.from_user.id,
+                                       f"Подписка до: {datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime('%d.%m.%Y %H:%M')}",
+                                       parse_mode="HTML")
+                if i['banned'] == False:
+                    await switchUserActivity(str(i['tgid']), True)
+                    await bot.send_message(m.from_user.id, f"Пользователь активирован", parse_mode="HTML")
+                else:
+                    await bot.send_message(m.from_user.id, f"У пользователя закончилась подписка", parse_mode="HTML")
+
+                await bot.delete_state(m.from_user.id)
+                return
+            except TypeError:
+                await bot.send_message(m.from_user.id, f"Произошла какая-то ошибка", parse_mode="HTML")
+                pass
+
+    await bot.send_message(m.from_user.id, "Пользователь не найден",
+                           reply_markup=await buttons.admin_buttons())
+    await bot.delete_state(m.from_user.id)
+    return
+
+
 @bot.message_handler(state="*", content_types=["text"])
 async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.chat.id)
@@ -1036,6 +1075,12 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(m.text) == "Активировать пользователя вручную :man:":
+            await bot.set_state(m.from_user.id, MyStates.switchActiveUserManual)
+            await bot.send_message(m.from_user.id, "Введите никнейм или id пользователя:",
+                                   reply_markup=await buttons.admin_buttons_back())
+            return
+
         if e.demojize(m.text) == "Добавить пользователя :plus:":
             await bot.send_message(m.from_user.id,
                                    "Введите имя для нового пользователя!\nМожно использовать только латинские символы и арабские цифры.",
@@ -1143,13 +1188,15 @@ async def Init(call: types.CallbackQuery):
             + f"Если у вас остались вопросы, напишите в поддержку {SUPPORT_USERNAME}, мы всегда на связи и рады вам помочь 🙌🏻."),
                                parse_mode="HTML")
     elif command == 'TIKTOK':
-        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Для корректной работы TikTok попробуйте, пожалуйста, переключиться на другие серверы."
-              f"\n\rДля этого вам необходимо удалить ваш ключ из приложения и добавить новый, который мы вам отправим следующим сообщением ниже."
-              f"\n\rЧто-то не получилось или этот способ не помог? Напишите {SUPPORT_USERNAME}, мы оперативно поможем 🙌🏻"),
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
+            f"Для корректной работы TikTok попробуйте, пожалуйста, переключиться на другие серверы."
+            f"\n\rДля этого вам необходимо удалить ваш ключ из приложения и добавить новый, который мы вам отправим следующим сообщением ниже."
+            f"\n\rЧто-то не получилось или этот способ не помог? Напишите {SUPPORT_USERNAME}, мы оперативно поможем 🙌🏻"),
                                parse_mode="HTML")
 
         await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
-            f"Пожалуйста, подождите, ваш персональный ключ для TikTok генерируется :locked_with_key:"), parse_mode="HTML")
+            f"Пожалуйста, подождите, ваш персональный ключ для TikTok генерируется :locked_with_key:"),
+                               parse_mode="HTML")
         await sendConfigAndInstructions(user_dat.tgid, 'tiktok', 'xui')
     else:
         await bot.send_message(user_dat.tgid, e.emojize(f'Напишите нам {SUPPORT_USERNAME}'), parse_mode="HTML",

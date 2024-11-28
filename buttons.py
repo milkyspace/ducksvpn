@@ -37,6 +37,7 @@ async def admin_buttons():
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить напоминание о службе поддержки :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Поиск пользователя по никнейму :magnifying_glass_tilted_left:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Перезагрузить базу :optical_disk:")))
+    Butt_admin.add(types.KeyboardButton(e.emojize(f"Активировать пользователя вручную :man:")))
     Butt_admin.add(types.KeyboardButton(e.emojize("Главное меню :right_arrow_curving_left:")))
     return Butt_admin
 
