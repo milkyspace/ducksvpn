@@ -93,6 +93,7 @@ class MyStates(StatesGroup):
     sendMessageToAllInactiveUser = State()
     findUsersByName = State()
     switchActiveUserManual = State()
+    updateAllUsers = State()
     editUser = State()
     editUserResetTime = State()
 
@@ -507,11 +508,8 @@ async def start(message: types.Message):
                 referrer_id = 0
 
             if user_dat.registered == False:
-                addedStatus = await addUser(message.from_user.id, username)
-                if addedStatus:
-                    await user_dat.Adduser(message.from_user.id, username, message.from_user.full_name, referrer_id)
-                else:
-                    return
+                await user_dat.Adduser(message.from_user.id, username, message.from_user.full_name, referrer_id)
+                await addUser(message.from_user.id, username)
 
             # Обработка реферера
             if referrer_id and referrer_id != user_dat.tgid:
@@ -916,6 +914,36 @@ async def Work_with_Message(m: types.Message):
     return
 
 
+@bot.message_handler(state=MyStates.updateAllUsers, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    user_dat = await User.GetInfo(m.from_user.id)
+    allusers = await user_dat.GetAllUsers()
+    try:
+        for i in allusers:
+            user = await User.GetInfo(i['tgid'])
+            timenow = int(time.time())
+            if int(user.subscription) < timenow:
+                await switchUserActivity(str(i['tgid']), False)
+            if int(user.subscription) >= timenow:
+                await switchUserActivity(str(i['tgid']), True)
+
+    except Exception as err:
+        print('UPDATE ALL USERS ERROR')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    await bot.send_message(m.from_user.id, "Обновление запущено в очередь",
+                           reply_markup=await buttons.admin_buttons())
+    await bot.delete_state(m.from_user.id)
+    return
+
+
 @bot.message_handler(state="*", content_types=["text"])
 async def Work_with_Message(m: types.Message):
     user_dat = await User.GetInfo(m.chat.id)
@@ -931,9 +959,8 @@ async def Work_with_Message(m: types.Message):
         arg_referrer_id = m.text[7:]
         referrer_id = arg_referrer_id if arg_referrer_id != user_dat.tgid else 0
 
-        addedStatus = await addUser(m.chat.id, username)
-        if addedStatus:
-            await user_dat.Adduser(m.chat.id, username, m.from_user.full_name, referrer_id)
+        await user_dat.Adduser(m.chat.id, username, m.from_user.full_name, referrer_id)
+        await addUser(m.chat.id, username)
 
         await bot.send_message(m.chat.id,
                                texts_for_bot["hello_message"],
@@ -1081,6 +1108,12 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(m.text) == "Обновить всех пользователей :man:":
+            await bot.set_state(m.from_user.id, MyStates.updateAllUsers)
+            await bot.send_message(m.from_user.id, "Вы уверены, что хотите обновить всех? Введите `Да`",
+                                   reply_markup=await buttons.admin_buttons_back())
+            return
+
         if e.demojize(m.text) == "Добавить пользователя :plus:":
             await bot.send_message(m.from_user.id,
                                    "Введите имя для нового пользователя!\nМожно использовать только латинские символы и арабские цифры.",
@@ -1153,7 +1186,7 @@ async def Init(call: types.CallbackQuery):
     device = str(call.data).split(":")[1]
     await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
         f"Пожалуйста, подождите, ваш персональный ключ генерируется :locked_with_key:"), parse_mode="HTML")
-    await addUser(user_dat.tgid, user_dat.username)
+    # await addUser(user_dat.tgid, user_dat.username)
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await bot.answer_callback_query(call.id)
 
@@ -1584,6 +1617,40 @@ def checkTime():
             pass
 
 
+def checkUsers():
+    while True:
+        try:
+            time.sleep(120)
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(addUser(i['tgid'], i['username']))
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(switchUserActivity(str(i['tgid']), True))
+
+        except Exception as err:
+            print('CHECK USERS ERROR')
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+
 def checkBackup():
     while True:
         try:
@@ -1608,6 +1675,8 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
+    threadcheckUsers = threading.Thread(target=checkUsers, name="checkUsers1")
+    threadcheckUsers.start()
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=90, timeout=60))
