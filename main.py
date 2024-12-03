@@ -162,8 +162,9 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
 
     if type == 'xui':
         connectionLinks = await getConnectionLinks(tgId, device)
+        print(connectionLinks)
         if connectionLinks['success'] != True:
-            asyncio.sleep(5)
+            sleep(5)
             connectionLinks = await getConnectionLinks(tgId, device)
         if connectionLinks['success']:
             data = connectionLinks['data']
