@@ -93,6 +93,7 @@ class MyStates(StatesGroup):
     sendMessageToAllUser = State()
     sendMessageToAmneziaUser = State()
     sendMessageToAllInactiveUser = State()
+    sendMessageToLast50User = State()
     findUsersByName = State()
     switchActiveUserManual = State()
     updateAllUsers = State()
@@ -849,6 +850,42 @@ async def Work_with_Message(m: types.Message):
     return
 
 
+@bot.message_handler(state=MyStates.sendMessageToLast50User, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"SELECT * FROM userss order by id desc limit 50")
+    log = dbCur.fetchall()
+    dbCur.close()
+    conn.close()
+
+    for i in log:
+        try:
+            supportButtons = types.InlineKeyboardMarkup(row_width=1)
+            supportButtons.add(
+                types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                           url=SUPPORT_LINK),
+            )
+
+            await bot.send_message(i['tgid'], e.emojize(m.text), parse_mode="HTML",
+                                   reply_markup=supportButtons)
+
+        except Exception as err:
+            print("sendMessageToLast50Users")
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+    await bot.delete_state(m.from_user.id)
+    await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+    return
+
+
 @bot.message_handler(state=MyStates.findUsersByName, content_types=["text"])
 async def Work_with_Message(m: types.Message):
     if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
@@ -929,7 +966,7 @@ async def Work_with_Message(m: types.Message):
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
-    dbCur.execute(f"SELECT * FROM userss order by id asc")
+    dbCur.execute(f"SELECT * FROM userss order by id desc limit 1500")
     log = dbCur.fetchall()
     dbCur.close()
     conn.close()
@@ -937,6 +974,7 @@ async def Work_with_Message(m: types.Message):
     try:
         k = 1
         for i in log:
+            print(k)
             user = await User.GetInfo(i['tgid'])
             timenow = int(time.time())
             if int(user.subscription) < timenow:
@@ -1139,6 +1177,12 @@ async def Work_with_Message(m: types.Message):
             await bot.send_message(m.from_user.id, f"{len(allusers)} пользователям",
                                    reply_markup=await buttons.admin_buttons())
 
+            return
+
+        if e.demojize(m.text) == "Отправить сообщение последним 50 пользователям :pencil:":
+            await bot.set_state(m.from_user.id, MyStates.sendMessageToLast50User)
+            await bot.send_message(m.from_user.id, "Введите сообщение:",
+                                   reply_markup=await buttons.admin_buttons_back())
             return
 
         if e.demojize(m.text) == "Поиск пользователя по никнейму :magnifying_glass_tilted_left:":
@@ -1683,7 +1727,7 @@ def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 28800 MINUTE) ORDER BY id DESC LIMIT 200;")
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
@@ -1694,7 +1738,7 @@ def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 28800 MINUTE) ORDER BY id DESC LIMIT 100")
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
