@@ -1,5 +1,7 @@
 import json
 import time
+from time import sleep
+
 import buttons
 import dbworker
 import pay
@@ -94,6 +96,7 @@ class MyStates(StatesGroup):
     findUsersByName = State()
     switchActiveUserManual = State()
     updateAllUsers = State()
+    update10Users = State()
     editUser = State()
     editUserResetTime = State()
 
@@ -158,6 +161,9 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
 
     if type == 'xui':
         connectionLinks = await getConnectionLinks(tgId, device)
+        if connectionLinks['success'] != True:
+            asyncio.sleep(5)
+            connectionLinks = await getConnectionLinks(tgId, device)
         if connectionLinks['success']:
             data = connectionLinks['data']
             link = data['link']
@@ -507,9 +513,7 @@ async def start(message: types.Message):
             if not referrer_id:
                 referrer_id = 0
 
-            if user_dat.registered == False:
-                await user_dat.Adduser(message.from_user.id, username, message.from_user.full_name, referrer_id)
-                await addUser(message.from_user.id, username)
+            await user_dat.Adduser(message.from_user.id, username, message.from_user.full_name, referrer_id)
 
             # Обработка реферера
             if referrer_id and referrer_id != user_dat.tgid:
@@ -536,6 +540,8 @@ async def start(message: types.Message):
 
             trialButtons = await getTrialButtons()
             await bot.send_message(message.chat.id, trialText, parse_mode="HTML", reply_markup=trialButtons)
+
+            await addUser(message.from_user.id, username)
 
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
@@ -921,10 +927,55 @@ async def Work_with_Message(m: types.Message):
         await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
         return
 
-    user_dat = await User.GetInfo(m.from_user.id)
-    allusers = await user_dat.GetAllUsers()
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"SELECT * FROM userss order by id asc")
+    log = dbCur.fetchall()
+    dbCur.close()
+    conn.close()
+
     try:
-        for i in allusers:
+        k = 1
+        for i in log:
+            user = await User.GetInfo(i['tgid'])
+            timenow = int(time.time())
+            if int(user.subscription) < timenow:
+                await switchUserActivity(str(i['tgid']), False)
+            if int(user.subscription) >= timenow:
+                await switchUserActivity(str(i['tgid']), True)
+            if k % 100 == 0:
+                await bot.send_message(m.from_user.id, f"{k} пользователей отправлены в очередь",
+                                       reply_markup=await buttons.admin_buttons())
+            k = k + 1
+
+    except Exception as err:
+        print('UPDATE ALL USERS ERROR')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    await bot.send_message(m.from_user.id, "Обновления запущены в очередь",
+                           reply_markup=await buttons.admin_buttons())
+    await bot.delete_state(m.from_user.id)
+    return
+
+
+@bot.message_handler(state=MyStates.update10Users, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернул вас назад!", reply_markup=await buttons.admin_buttons())
+        return
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"SELECT * FROM userss order by id desc limit 10")
+    log = dbCur.fetchall()
+    dbCur.close()
+    conn.close()
+
+    try:
+        for i in log:
             user = await User.GetInfo(i['tgid'])
             timenow = int(time.time())
             if int(user.subscription) < timenow:
@@ -933,12 +984,12 @@ async def Work_with_Message(m: types.Message):
                 await switchUserActivity(str(i['tgid']), True)
 
     except Exception as err:
-        print('UPDATE ALL USERS ERROR')
+        print('UPDATE 10 USERS ERROR')
         print(err)
         print(traceback.format_exc())
         pass
 
-    await bot.send_message(m.from_user.id, "Обновление запущено в очередь",
+    await bot.send_message(m.from_user.id, "Обновления запущены в очередь",
                            reply_markup=await buttons.admin_buttons())
     await bot.delete_state(m.from_user.id)
     return
@@ -1108,6 +1159,13 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(m.text) == "Обновить последних 10 пользователей :man:":
+            await bot.set_state(m.from_user.id, MyStates.update10Users)
+            await bot.send_message(m.from_user.id,
+                                   "Вы уверены, что хотите обновить последних 10 пользователей? Введите `Да`",
+                                   reply_markup=await buttons.admin_buttons_back())
+            return
+
         if e.demojize(m.text) == "Обновить всех пользователей :man:":
             await bot.set_state(m.from_user.id, MyStates.updateAllUsers)
             await bot.send_message(m.from_user.id, "Вы уверены, что хотите обновить всех? Введите `Да`",
@@ -1182,12 +1240,12 @@ async def Work_with_Message(m: types.Message):
 
 @bot.callback_query_handler(func=lambda c: 'Init:' in c.data)
 async def Init(call: types.CallbackQuery):
+    await bot.send_message(chat_id=call.from_user.id, text=e.emojize(
+        f"Пожалуйста, подождите, ваш персональный ключ генерируется :locked_with_key:"), parse_mode="HTML")
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
-    await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(
-        f"Пожалуйста, подождите, ваш персональный ключ генерируется :locked_with_key:"), parse_mode="HTML")
-    # await addUser(user_dat.tgid, user_dat.username)
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
+    await addUser(user_dat.tgid, user_dat.username)
     await bot.answer_callback_query(call.id)
 
 
@@ -1625,7 +1683,7 @@ def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 28800 MINUTE) ORDER BY id DESC LIMIT 200;")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
@@ -1636,7 +1694,7 @@ def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 28800 MINUTE) ORDER BY id DESC LIMIT 100")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()

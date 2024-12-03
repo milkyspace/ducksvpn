@@ -26,37 +26,17 @@ CONFIG = {
     "server_manager_email": os.getenv("SERVER_MANAGER_EMAIL"),
     "server_manager_password": os.getenv("SERVER_MANAGER_PASSWORD"),
     "server_manager_api_token": os.getenv("SERVER_MANAGER_API_TOKEN"),
+    "server_manager_token": os.getenv("SERVER_MANAGER_TOKEN"),
 }
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
 SERVER_MANAGER_PASSWORD = CONFIG["server_manager_password"]
+SERVER_MANAGER_TOKEN = CONFIG["server_manager_token"]
 
 
-async def getToken(breakLoop=True):
-    response = requests.post(f"{SERVER_MANAGER_URL}/auth/login",
-                             headers={"Content-Type": "application/json", },
-                             data=json.dumps({"email": SERVER_MANAGER_EMAIL, "password": SERVER_MANAGER_PASSWORD}))
-    if response:
-        return response.json()["token"]
-    elif breakLoop:
-        requests.get(f"{SERVER_MANAGER_URL}/sanctum/csrf-cookie")
-        return await getToken(False)
-    else:
-        return ""
-
-
-def getTokenDefault(breakLoop=True):
-    response = requests.post(f"{SERVER_MANAGER_URL}/auth/login",
-                             headers={"Content-Type": "application/json", },
-                             data=json.dumps({"email": SERVER_MANAGER_EMAIL, "password": SERVER_MANAGER_PASSWORD}))
-    if response:
-        return response.json()["token"]
-    elif breakLoop:
-        requests.get(f"{SERVER_MANAGER_URL}/sanctum/csrf-cookie")
-        return getToken(False)
-    else:
-        return ""
+async def getToken():
+    return SERVER_MANAGER_TOKEN
 
 
 async def addUser(userid, username, type=''):
@@ -71,7 +51,7 @@ async def addUser(userid, username, type=''):
             "name": str(username),
             "limit_ip": 3,
             "type": type,
-        }))
+        }), timeout=120)
 
     if response:
         return True
@@ -79,7 +59,7 @@ async def addUser(userid, username, type=''):
     return False
 
 
-async def getConnectionLinks(tgId, keyType = 'default'):
+async def getConnectionLinks(tgId, keyType='default'):
     token = f"Bearer {await getToken()}"
     requestAddress = f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getLink/{keyType}"
     if keyType == 'TikTok':
@@ -87,7 +67,7 @@ async def getConnectionLinks(tgId, keyType = 'default'):
     response = requests.get(requestAddress,
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
-                                     "Authorization": token})
+                                     "Authorization": token}, timeout=120)
     if response:
         jsonResponse = response.json()
         data = jsonResponse['data']
@@ -113,7 +93,7 @@ async def getAmneziaConnectionFile(tgId):
     response = requests.get(f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getAmneziaFile",
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
-                                     "Authorization": token})
+                                     "Authorization": token}, timeout=120)
 
     if response:
         contentDisposition = response.headers["Content-Disposition"]
@@ -136,27 +116,31 @@ async def getAmneziaConnectionFile(tgId):
 
 
 async def switchUserActivity(tgid, val):
+    print('switchUserActivity start')
     if (val == True):
         update = {
-            "expiry_time": '0',
             "enable": '1'
         }
     else:
         update = {
-            "expiry_time": 'now',
             "enable": '0'
         }
 
     update.update({'limit_ip': 3})
 
     token = f"Bearer {await getToken()}"
+    print('switchUserActivity response start')
+    print('switchUserActivity token ' + str(token))
+    print('switchUserActivity json.dumps(update) ' + json.dumps(update))
+    print('switchUserActivity f"{SERVER_MANAGER_URL}/vpnservers/{tgid}" ' + f"{SERVER_MANAGER_URL}/vpnservers/{tgid}")
     response = requests.put(
         f"{SERVER_MANAGER_URL}/vpnservers/{tgid}",
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
-        data=json.dumps(update))
-
+        data=json.dumps(update), timeout=120)
+    print('switchUserActivity response stop')
+    print(response)
     if response:
         return True
 
