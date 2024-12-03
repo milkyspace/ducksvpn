@@ -1781,7 +1781,7 @@ if __name__ == '__main__':
     threadcheckUsers.start()
 
     try:
-        asyncio.run(bot.infinity_polling(request_timeout=90, timeout=60))
+        asyncio.run(bot.infinity_polling(request_timeout=300, timeout=60, skip_pending=True))
     except Exception as err:
         print('asyncio error')
         print(err)
