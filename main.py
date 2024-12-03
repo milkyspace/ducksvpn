@@ -294,7 +294,7 @@ async def AddTimeToUser(tgid, timetoadd):
         dbCur.close()
         conn.close()
 
-        await switchUserActivity(str(userdat.tgid), True)
+        asyncio.create_task(switchUserActivity(str(userdat.tgid), True))
 
         await bot.send_message(userdat.tgid, e.emojize(
             f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
