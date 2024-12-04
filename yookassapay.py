@@ -39,9 +39,9 @@ YOOKASSA_SHOP_ID = CONFIG["yookassa_shop_id"]
 YOOKASSA_SECRET_KEY = CONFIG["yookassa_secret_key"]
 
 DBHOST = CONFIG["db_host"]
-DBUSER = CONFIG["db_name"]
-DBPASSWORD = CONFIG["db_user"]
-DBNAME = CONFIG["db_password"]
+DBUSER = CONFIG["db_user"]
+DBPASSWORD = CONFIG["db_password"]
+DBNAME = CONFIG["db_name"]
 
 
 class YooKassa:

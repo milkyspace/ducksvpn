@@ -75,9 +75,9 @@ BOTAPIKEY = CONFIG["tg_token"]
 bot = AsyncTeleBot(CONFIG["tg_token"], state_storage=StateMemoryStorage())
 
 DBHOST = CONFIG["db_host"]
-DBUSER = CONFIG["db_name"]
-DBPASSWORD = CONFIG["db_user"]
-DBNAME = CONFIG["db_password"]
+DBUSER = CONFIG["db_user"]
+DBPASSWORD = CONFIG["db_password"]
+DBNAME = CONFIG["db_name"]
 
 PAYMENT_SYSTEM_CODE = CONFIG["payment_system_code"]
 SUPPORT_LINK = CONFIG["support_link"]
