@@ -41,6 +41,7 @@ mysql -u admin -p adminpassword
   # CREATE TABLE IF NOT EXISTS userss (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,tgid varchar(50) UNIQUE,subscription text,banned BOOLEAN DEFAULT FALSE NOT NULL,username varchar(50),fullname varchar(50),  referrer_id int, type varchar(20));
   # CREATE TABLE IF NOT EXISTS notions (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,tgid varchar(50),notion_type varchar(50) ,complete BOOLEAN DEFAULT FALSE NOT NULL,  time DATETIME DEFAULT CURRENT_TIMESTAMP);
   # CREATE TABLE IF NOT EXISTS payments (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,tgid varchar(50),bill_id text,amount int,time_to_add bigint, message_id bigint, chat_id bigint, status varchar(50),mesid text , time DATETIME DEFAULT CURRENT_TIMESTAMP);
+  # CREATE TABLE IF NOT EXISTS gifts (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, sender_tgid varchar(50), recipient_tgid varchar(50), payment_id text, status varchar(50), time DATETIME DEFAULT CURRENT_TIMESTAMP);
 ```
 
 ## Setting up a vpn server (any number)
