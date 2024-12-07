@@ -411,9 +411,11 @@ def getSale(month):
         sale = 0
     return sale
 
+
 def randomword(length):
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
 
 def paymentSuccess(paymentId):
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -460,7 +462,8 @@ def paymentSuccess(paymentId):
                         f"<b><code>{secret}</code></b>\n\r\n\r" \
                         f"Когда обладатель подарка перейдет по ссылке, мы поздравим его и продлим его подписку VPN Ducks!\n\r\n\r" \
                         f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{giftLink}</code></b>")
-        BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)), parse_mode="HTML")
+        BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
+                              parse_mode="HTML")
         return
 
     try:
@@ -571,6 +574,15 @@ async def start(message: types.Message):
             await bot.send_message(message.chat.id, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
             await addUser(message.from_user.id, username)
+
+
+@bot.message_handler(commands=['gift'])
+async def gift(message: types.Message):
+    if message.chat.type == "private":
+        await bot.delete_state(message.from_user.id)
+        user_dat = await User.GetInfo(message.chat.id)
+
+        print(message.text)
 
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
