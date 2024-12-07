@@ -97,12 +97,12 @@ class User:
         dbCur.close()
         conn.close()
 
-    async def NewPay(self, bill_id, summ, time_to_add, mesid, status='success', messageId=0):
+    async def NewPay(self, bill_id, summ, time_to_add, mesid, status='success', messageId=0, additional=''):
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
         dbCur.execute(
-            f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid,status,message_id) values (%s,%s,%s,%s,%s,%s,%s)",
-            (self.tgid, str(bill_id), summ, int(time_to_add), str(mesid), status, messageId))
+            f"INSERT INTO payments (tgid,bill_id,amount,time_to_add,mesid,status,message_id,additional) values (%s,%s,%s,%s,%s,%s,%s,%s)",
+            (self.tgid, str(bill_id), summ, int(time_to_add), str(mesid), status, messageId, additional))
         conn.commit()
         dbCur.close()
         conn.close()
@@ -116,6 +116,21 @@ class User:
         conn.close()
 
         return log
+
+    async def newGift(self, payment_id, secret, status='new'):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(
+            f"INSERT INTO gifts (sender_tgid,payment_id,secret,status) values (%s,%s,%s,%s)",
+            (self.tgid, str(payment_id), secret, status))
+        id = dbCur.lastrowid
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        if id is None:
+            return 0
+        return id
 
     async def Adduser(self, userid, username, full_name, referrer_id):
         if self.registered == False:

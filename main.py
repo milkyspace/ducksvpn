@@ -15,6 +15,8 @@ import asyncio
 import pymysql
 import pymysql.cursors
 import subprocess
+import random
+import string
 from datetime import datetime
 from telebot.apihelper import ApiTelegramException
 from datetime import datetime
@@ -120,8 +122,11 @@ async def getTrialButtons():
     return trialButtons
 
 
-async def sendPayMessage(chatId):
+async def sendPayMessage(chatId, additionalParam=''):
     Butt_payment = types.InlineKeyboardMarkup()
+
+    if additionalParam != '':
+        additionalParam = ':' + additionalParam
 
     if chatId in CONFIG["admin_tg_id"]:
         Butt_payment.add(
@@ -129,16 +134,16 @@ async def sendPayMessage(chatId):
                                        callback_data="BuyMonth:100"))
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"1 месяц: {int(getCostBySale(1))} руб."),
-                                   callback_data="BuyMonth:1"))
+                                   callback_data="BuyMonth:1" + additionalParam))
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"3 месяца: {int(getCostBySale(3))} руб. (-{getSale(3)}%)"),
-                                   callback_data="BuyMonth:3"))
+                                   callback_data="BuyMonth:3" + additionalParam))
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"6 месяцев: {int(getCostBySale(6))} руб. (-{getSale(6)}%)"),
-                                   callback_data="BuyMonth:6"))
+                                   callback_data="BuyMonth:6" + additionalParam))
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"1 год: {int(getCostBySale(12))} руб. (-{getSale(12)}%)"),
-                                   callback_data="BuyMonth:12"))
+                                   callback_data="BuyMonth:12" + additionalParam))
     await bot.send_message(chatId,
                            "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:",
                            disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
@@ -406,6 +411,9 @@ def getSale(month):
         sale = 0
     return sale
 
+def randomword(length):
+   letters = string.ascii_lowercase
+   return ''.join(random.choice(letters) for i in range(length))
 
 def paymentSuccess(paymentId):
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -420,6 +428,7 @@ def paymentSuccess(paymentId):
     tgid = log['tgid']
     amount = log['amount']
     addTimeSubscribe = log['time_to_add']
+    additional = log['additional']
     paymentsCount = 0
 
     try:
@@ -438,6 +447,22 @@ def paymentSuccess(paymentId):
         pass
 
     user_dat = asyncio.run(User.GetInfo(tgid))
+
+    if additional == 'gift':
+        secret = randomword(10)
+        giftId = asyncio.run(user_dat.newGift(tgid, paymentId, secret))
+        BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
+
+        giftLink = f"https://t.me/{CONFIG['bot_name']}?gift=" + str(giftId)
+        msg = e.emojize(f"<b>Ссылка на подарок и секретный код активации</b>\n\r\n\r" \
+                        f":wrapped_gift: Скопируйте ссылку на подарок и отправьте её получателю.\n\r" \
+                        f"Обязательно передайте получателю подарка секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r" \
+                        f"<b><code>{secret}</code></b>\n\r\n\r" \
+                        f"Когда обладатель подарка перейдет по ссылке, мы поздравим его и продлим его подписку VPN Ducks!\n\r\n\r" \
+                        f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{giftLink}</code></b>")
+        BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)), parse_mode="HTML")
+        return
+
     try:
         dateto = datetime.utcfromtimestamp(
             int(user_dat.subscription) + int(addTimeSubscribe) + CONFIG["UTC_time"] * 3600).strftime(
@@ -494,6 +519,8 @@ async def start(message: types.Message):
     if message.chat.type == "private":
         await bot.delete_state(message.from_user.id)
         user_dat = await User.GetInfo(message.chat.id)
+
+        print(message.text)
 
         if user_dat.registered:
             await sendConfig(message.chat.id)
@@ -567,7 +594,7 @@ async def Work_with_Message(m: types.Message):
         Butt_skip = types.ReplyKeyboardMarkup(resize_keyboard=True)
         Butt_skip.add(types.KeyboardButton(e.emojize(f"Да")))
         Butt_skip.add(types.KeyboardButton(e.emojize(f"Нет")))
-        await bot.send_message(m.from_user.id, "Вы уверены что хотите сбросить время для этого пользователя ?",
+        await bot.send_message(m.from_user.id, "Вы уверены что хотите сбросить время для этого пользователя?",
                                reply_markup=Butt_skip)
         return
 
@@ -672,7 +699,7 @@ async def Work_with_Message(m: types.Message):
     Butt_skip.add(types.KeyboardButton(e.emojize(f"Да")))
     Butt_skip.add(types.KeyboardButton(e.emojize(f"Нет")))
     await bot.send_message(m.from_user.id,
-                           f"Пользователю {str(tgid)} добавится:\n\nДни: {str(days)}\nЧасы: {str(hours)}\nМинуты: {str(minutes)}\n\nВсе верно ?",
+                           f"Пользователю {str(tgid)} добавится:\n\nДни: {str(days)}\nЧасы: {str(hours)}\nМинуты: {str(minutes)}\n\nВсе верно?",
                            reply_markup=Butt_skip)
 
 
@@ -1042,7 +1069,6 @@ async def Work_with_Message(m: types.Message):
         try:
             username = "@" + str(m.from_user.username)
         except:
-
             username = str(m.from_user.id)
 
         # Определяем referrer_id
@@ -1258,6 +1284,7 @@ async def Work_with_Message(m: types.Message):
                                        url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
             types.InlineKeyboardButton(e.emojize(":video_camera: Не работает TikTok?"), callback_data="Help:TIKTOK"),
+            # types.InlineKeyboardButton(e.emojize(":gift: Подарить подписку"), callback_data="Help:GIFT"),
         )
         if user_dat.type == 'amnezia':
             helpButtons.add(
@@ -1334,6 +1361,10 @@ async def Init(call: types.CallbackQuery):
             f"Пожалуйста, подождите, ваш персональный ключ для TikTok генерируется :locked_with_key:"),
                                parse_mode="HTML")
         await sendConfigAndInstructions(user_dat.tgid, 'tiktok', 'xui')
+    elif command == 'GIFT':
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Выберите продолжительность подписки 🙌🏻"),
+                               parse_mode="HTML")
+        await sendPayMessage(user_dat.tgid, 'gift')
     else:
         await bot.send_message(user_dat.tgid, e.emojize(f'Напишите нам {SUPPORT_USERNAME}'), parse_mode="HTML",
                                reply_markup=await main_buttons(user_dat, True))
@@ -1368,6 +1399,8 @@ async def Buy_month(call: types.CallbackQuery):
 
     monthСount = int(str(call.data).split(":")[1])
 
+    additional = int(str(call.data).split(":")[2])
+
     try:
         await bot.delete_message(call.message.chat.id, call.message.id)
     except:
@@ -1375,11 +1408,15 @@ async def Buy_month(call: types.CallbackQuery):
 
     # if call.message.chat.id in CONFIG["admin_tg_id"]:
     try:
+        label = f"VPN на {str(monthСount)} мес. ({call.message.chat.id})"
+        if additional == 'gift':
+            label = f"VPN в подарок на {str(monthСount)} мес. ({call.message.chat.id})"
+
         price = getCostBySale(monthСount)
         pay = await Pay(PAYMENT_SYSTEM_CODE).createPay(
             tgid=call.message.chat.id,
             currency="RUB",
-            label=f"VPN на {str(monthСount)} мес. ({call.message.chat.id})",
+            label=label,
             price=price
         )
         payLink = pay['link']
@@ -1400,8 +1437,12 @@ async def Buy_month(call: types.CallbackQuery):
         else:
             monthText = 'месяцев'
 
+        text = f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay"
+        if additional == 'gift':
+            text = f"<b>Оплата подписки в подарок на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подарок с помощью банковских карт, СБП и SberPay"
+
         messageSend = await bot.send_message(chat_id=call.message.chat.id,
-                                             text=f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay",
+                                             text=text,
                                              parse_mode="HTML", reply_markup=payLinkButton)
 
         messageId = messageSend.message_id
@@ -1412,7 +1453,8 @@ async def Buy_month(call: types.CallbackQuery):
             addTimeSubscribe,
             call.message.chat.id,
             Pay.STATUS_CREATED,
-            messageId
+            messageId,
+            additional
         )
     except Exception as e:
         print('payment error')
