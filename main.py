@@ -530,6 +530,7 @@ async def start(message: types.Message):
         user_dat = await User.GetInfo(message.chat.id)
 
         print('gift start')
+        print(message.text.find('gift'))
         if message.text.find('gift') >= 0:
             await bot.send_message(message.chat.id, message.text,
                                    parse_mode="HTML",
