@@ -123,6 +123,8 @@ async def getTrialButtons():
 
 
 async def sendPayMessage(chatId, additionalParam=''):
+    print('sendPayMessage start')
+
     Butt_payment = types.InlineKeyboardMarkup()
 
     if additionalParam != '':
@@ -144,9 +146,13 @@ async def sendPayMessage(chatId, additionalParam=''):
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"1 год: {int(getCostBySale(12))} руб. (-{getSale(12)}%)"),
                                    callback_data="BuyMonth:12" + additionalParam))
+
+    print('sendPayMessage send_message')
+
     await bot.send_message(chatId,
                            "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:",
                            disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
+    print('sendPayMessage stop')
 
 
 async def sendConfig(chatId):
@@ -1069,6 +1075,7 @@ async def Work_with_Message(m: types.Message):
 
 @bot.message_handler(state="*", content_types=["text"])
 async def Work_with_Message(m: types.Message):
+    print('Work_with_Message start')
     user_dat = await User.GetInfo(m.chat.id)
 
     if user_dat.registered == False:
@@ -1257,9 +1264,7 @@ async def Work_with_Message(m: types.Message):
             return
 
     if e.demojize(m.text) == "Продлить подписку :money_bag:":
-        payment_info = await user_dat.PaymentInfo()
-        if True:
-            await sendPayMessage(m.chat.id)
+        await sendPayMessage(m.chat.id)
         return
 
     if e.demojize(m.text) == "Как подключить :gear:":
