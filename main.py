@@ -529,10 +529,10 @@ async def start(message: types.Message):
         await bot.delete_state(message.from_user.id)
         user_dat = await User.GetInfo(message.chat.id)
 
-        if 'gift' in message.text:
-            await bot.send_message(message.chat.id, message.text,
-                                   parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat))
+        # if 'gift' in message.text:
+        #     await bot.send_message(message.chat.id, message.text,
+        #                            parse_mode="HTML",
+        #                            reply_markup=await main_buttons(user_dat))
 
         if user_dat.registered:
             await sendConfig(message.chat.id)
