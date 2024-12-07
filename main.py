@@ -455,7 +455,7 @@ def paymentSuccess(paymentId):
         giftId = asyncio.run(user_dat.newGift(tgid, paymentId, secret))
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
 
-        giftLink = f"https://t.me/{CONFIG['bot_name']}?gift=" + str(giftId)
+        giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift_' + str(giftId)
         msg = e.emojize(f"<b>Ссылка на подарок и секретный код активации</b>\n\r\n\r" \
                         f":wrapped_gift: Скопируйте ссылку на подарок и отправьте её получателю.\n\r" \
                         f"Обязательно передайте получателю подарка секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r" \
@@ -574,15 +574,6 @@ async def start(message: types.Message):
             await bot.send_message(message.chat.id, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
             await addUser(message.from_user.id, username)
-
-
-@bot.message_handler(commands=['gift'])
-async def gift(message: types.Message):
-    if message.chat.type == "private":
-        await bot.delete_state(message.from_user.id)
-        user_dat = await User.GetInfo(message.chat.id)
-
-        print(message.text)
 
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
