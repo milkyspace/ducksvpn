@@ -382,6 +382,39 @@ def AddTimeToUserSync(tgid, timetoadd):
             'Информация о подписке обновлена'), parse_mode="HTML",
                               reply_markup=asyncio.run(main_buttons(userdat, True)))
 
+async def AddTimeToUserAsync(tgid, timetoadd):
+    userdat = await User.GetInfo(tgid)
+    if userdat.subscription == None:
+        return
+    if int(userdat.subscription) < int(time.time()):
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s, banned=false where tgid=%s",
+                      (str(int(time.time()) + timetoadd), userdat.tgid))
+        dbCur.execute(f"DELETE FROM notions where tgid=%s", (userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        await switchUserActivity(str(userdat.tgid), True)
+
+        await bot.send_message(userdat.tgid, e.emojize(
+            f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
+                              parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
+    else:
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"Update userss set subscription = %s where tgid=%s",
+                      (str(int(userdat.subscription) + timetoadd), userdat.tgid))
+        conn.commit()
+        dbCur.close()
+        conn.close()
+
+        await switchUserActivity(str(userdat.tgid), True)
+        await bot.send_message(userdat.tgid, e.emojize(
+            'Информация о подписке обновлена'), parse_mode="HTML",
+                              reply_markup=await main_buttons(userdat, True))
+
 
 def getCostBySale(month):
     cost = month * CONFIG['one_month_cost']
@@ -662,7 +695,7 @@ async def Work_with_Message(m: types.Message):
             if not userDat.registered:
                 await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
             addTimeSubscribe = paymentLog['time_to_add']
-            asyncio.to_thread(AddTimeToUserSync(m.chat.id, addTimeSubscribe))
+            await AddTimeToUserAsync(m.chat.id, addTimeSubscribe)
             await bot.send_message(m.from_user.id, e.demojize(f'<b>Поздравляем!</b>\r\n'
                                                    f'Подарок активирован :wrapped_gift:'),
                                    parse_mode="HTML",
