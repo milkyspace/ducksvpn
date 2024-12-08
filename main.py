@@ -536,6 +536,7 @@ async def start(message: types.Message):
             await bot.send_message(message.chat.id, message.text,
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(user_dat))
+            return
         print('gift stop')
 
         if user_dat.registered:
