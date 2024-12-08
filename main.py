@@ -598,13 +598,14 @@ async def start(message: types.Message):
         try:
             if message.text.find('gift') >= 0:
                 print('gift send')
-                async with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+                await bot.set_state(message.chat.id, MyStates.EnterGiftSecret)
+
+                async with bot.retrieve_data(message.from_user.id) as data:
                     data['giftid'] = message.text.replace('/start gift', '')
 
                 await bot.send_message(message.chat.id, f'Для вас подготовлен подарок! :wrapped_gift:',
                                        parse_mode="HTML",
                                        reply_markup=await main_buttons(user_dat))
-                await bot.set_state(message.chat.id, MyStates.EnterGiftSecret)
                 buttSkip = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 buttSkip.add(types.KeyboardButton(e.emojize(f"Отменить :right_arrow_curving_left:")))
                 await bot.send_message(message.chat.id, "Введите секретный код подарка:", reply_markup=buttSkip)
