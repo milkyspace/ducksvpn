@@ -660,10 +660,6 @@ async def Work_with_Message(m: types.Message):
                                                    f'Подарок активирован :wrapped_gift:',
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
-        else:
-            await bot.send_message(m.from_user.id, f'Подарок не найден :(',
-                                   parse_mode="HTML",
-                                   reply_markup=await main_buttons(userDat, True))
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -673,13 +669,18 @@ async def Work_with_Message(m: types.Message):
             dbCur.close()
             conn.close()
 
-            if not userDat.registered:
-                await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
-    else:
-        if not userDat.registered:
+        else:
             await bot.send_message(m.from_user.id, f'Подарок не найден :(',
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
+
+            if not userDat.registered:
+                await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
+    else:
+        await bot.send_message(m.from_user.id, f'Подарок не найден :(',
+                               parse_mode="HTML",
+                               reply_markup=await main_buttons(userDat, True))
+        if not userDat.registered:
             await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
 
 
