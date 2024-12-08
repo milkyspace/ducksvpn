@@ -610,7 +610,6 @@ async def start(message: types.Message):
             print(err)
             print(traceback.format_exc())
             pass
-
         if user_dat.registered:
             await startSendRegistered(message.chat.id)
         else:
@@ -624,9 +623,9 @@ async def Work_with_Message(m: types.Message):
     if e.demojize(m.text) == "Отменить :right_arrow_curving_left:":
         await bot.reset_data(m.from_user.id)
         await bot.delete_state(m.from_user.id)
-        await bot.send_message(m.from_user.id, "Вернули вас назад!", reply_markup=await buttons.admin_buttons())
+        await bot.send_message(m.from_user.id, "Вернули вас назад!", reply_markup=await main_buttons(userDat, True))
         if not userDat.registered:
-            await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name)
+            await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
         return
 
     giftId = 0
@@ -637,13 +636,13 @@ async def Work_with_Message(m: types.Message):
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
-    dbCur.execute(f"select * from gifts where id = %s and secret=false limit 1",
+    dbCur.execute(f"select * from gifts where id = %s and secret = %s and status='new' limit 1",
                   (giftId, secretCode))
     giftLog = dbCur.fetchone()
     dbCur.close()
     conn.close()
 
-    if giftLog is None:
+    if giftLog is not None:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
         dbCur.execute(f"select * from payments where id = %s limit 1",
@@ -651,13 +650,36 @@ async def Work_with_Message(m: types.Message):
         paymentLog = dbCur.fetchone()
         dbCur.close()
         conn.close()
-        if paymentLog is None:
+        if paymentLog is not None:
+            if not userDat.registered:
+                await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
             addTimeSubscribe = paymentLog['time_to_add']
             await AddTimeToUser(m.chat.id, addTimeSubscribe)
             await bot.send_message(m.from_user.id, f'<b>Поздравляем!</b>\r\n'
                                                    f'Подарок активирован :wrapped_gift:',
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
+        else:
+            await bot.send_message(m.from_user.id, f'Подарок не найден :(',
+                                   parse_mode="HTML",
+                                   reply_markup=await main_buttons(userDat, True))
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"update gifts set status='success' where id = %s",
+                          (giftId))
+            conn.commit()
+            dbCur.close()
+            conn.close()
+
+            if not userDat.registered:
+                await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
+    else:
+        if not userDat.registered:
+            await bot.send_message(m.from_user.id, f'Подарок не найден :(',
+                                   parse_mode="HTML",
+                                   reply_markup=await main_buttons(userDat, True))
+            await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
 
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
