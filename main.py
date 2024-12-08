@@ -1614,7 +1614,7 @@ async def toActivatePromo(call: types.CallbackQuery):
     dbCur.close()
     conn.close()
 
-    if promoLog is not None:
+    if promoLog is None:
         await bot.send_message(chat_id=userDat.tgid, text="Такой акции уже нет :)",
                                reply_markup=await main_buttons(userDat))
         await bot.delete_state(userDat.tgid)
