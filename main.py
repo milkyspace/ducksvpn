@@ -132,12 +132,10 @@ async def sendPayMessage(chatId, additionalParam=''):
     if additionalParam != '':
         additionalParam = ':' + additionalParam
 
-    print(additionalParam)
-
     if chatId in CONFIG["admin_tg_id"]:
         Butt_payment.add(
             types.InlineKeyboardButton(e.emojize(f"Проверка оплаты: {int(getCostBySale(100))} руб."),
-                                       callback_data="BuyMonth:100"))
+                                       callback_data="BuyMonth:100" + additionalParam))
     Butt_payment.add(
         types.InlineKeyboardButton(e.emojize(f"1 месяц: {int(getCostBySale(1))} руб."),
                                    callback_data="BuyMonth:1" + additionalParam))
