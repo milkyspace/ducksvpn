@@ -699,6 +699,8 @@ async def Work_with_Message(m: types.Message):
             await AddTimeToUserAsync(m.chat.id, addTimeSubscribe)
 
             monthСount = int(addTimeSubscribe / (30 * 24 * 60 * 60))
+            print(addTimeSubscribe)
+            print(monthСount)
             if monthСount == 1:
                 monthText = '1 месяц'
             elif monthСount == 12:
