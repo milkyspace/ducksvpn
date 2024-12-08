@@ -473,6 +473,12 @@ def paymentSuccess(paymentId):
                         )
         BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
                               parse_mode="HTML")
+
+        month = addTimeSubscribe / (30 * 24 * 60 * 60)
+        for admin in CONFIG["admin_tg_id"]:
+            BotCheck.send_message(admin,
+                                  f"Новая оплата ПОДАРКА от {user_dat.username} ( {user_dat.tgid} ) на <b>{month}</b> мес. : {amount} руб.",
+                                  parse_mode="HTML")
         return
 
     try:
