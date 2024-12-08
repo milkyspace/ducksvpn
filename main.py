@@ -741,6 +741,9 @@ async def Work_with_Message(m: types.Message):
         if not userDat.registered:
             await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
 
+    await bot.reset_data(m.from_user.id)
+    await bot.delete_state(m.from_user.id)
+
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
 async def Work_with_Message(m: types.Message):
