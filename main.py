@@ -522,6 +522,59 @@ def paymentSuccess(paymentId):
         print(traceback.format_exc())
         pass
 
+async def startSendRegistered(tgId):
+    user_dat = await User.GetInfo(tgId)
+    await sendConfig(tgId)
+    await bot.send_message(tgId, e.emojize("Инструкция по установке :index_pointing_up:"),
+                           parse_mode="HTML",
+                           reply_markup=await main_buttons(user_dat))
+
+async def startSendNotRegistered(tgId, userName, fullName, messageText = ''):
+    user_dat = await User.GetInfo(tgId)
+
+    try:
+        username = "@" + str(userName)
+    except:
+        username = str(tgId)
+
+    if (username == "@None"):
+        username = str(tgId)
+
+    # Определяем referrer_id
+    arg_referrer_id = messageText[7:]
+    referrer_id = None if arg_referrer_id is None else arg_referrer_id
+    if not referrer_id:
+        referrer_id = 0
+
+    await user_dat.Adduser(tgId, username, fullName, referrer_id)
+
+    # Обработка реферера
+    if referrer_id and referrer_id != user_dat.tgid:
+        # Пользователь пришел по реферальной ссылке, обрабатываем это
+        referrerUser = await User.GetInfo(referrer_id)
+
+        comingUserInfo = fullName
+        if str(userName) != 'None':
+            comingUserInfo = comingUserInfo + ' ( ' + username + ' )'
+
+        await bot.send_message(referrer_id,
+                               f"По вашей ссылке пришел новый пользователь: {comingUserInfo}\nВы получите +1 месяц бесплатного доступа, если он оплатит подписку",
+                               reply_markup=await main_buttons(referrerUser))
+
+        for admin in CONFIG["admin_tg_id"]:
+            await bot.send_message(admin,
+                                   f"По ссылке от пользователя {referrerUser.username} ( {referrer_id} ) пришел новый пользователь: {comingUserInfo}")
+
+    # Приветствуем нового пользователя (реферала)
+    user_dat = await User.GetInfo(tgId)
+    trialText = e.emojize(f"Привет, {user_dat.fullname}!\n\r\n\r" \
+                          f"🎁 <b>Дарим вам 7 дней бесплатного доступа!</b>\n\r\n\r" \
+                          f"Пожалуйста, выберите тип телефона или планшета, для которого нужна инструкция для подключения:\n\r")
+
+    trialButtons = await getTrialButtons()
+    await bot.send_message(tgId, trialText, parse_mode="HTML", reply_markup=trialButtons)
+
+    await addUser(tgId, username)
 
 @bot.message_handler(commands=['start'])
 async def start(message: types.Message):
@@ -540,55 +593,9 @@ async def start(message: types.Message):
         print('gift stop')
 
         if user_dat.registered:
-            await sendConfig(message.chat.id)
-            await bot.send_message(message.chat.id, e.emojize("Инструкция по установке :index_pointing_up:"),
-                                   parse_mode="HTML",
-                                   reply_markup=await main_buttons(user_dat))
+            await startSendRegistered(message.chat.id)
         else:
-            try:
-                username = "@" + str(message.from_user.username)
-            except:
-                username = str(message.from_user.id)
-
-            if (username == "@None"):
-                username = str(message.from_user.id)
-
-            # Определяем referrer_id
-            arg_referrer_id = message.text[7:]
-            referrer_id = None if arg_referrer_id is None else arg_referrer_id
-            if not referrer_id:
-                referrer_id = 0
-
-            await user_dat.Adduser(message.from_user.id, username, message.from_user.full_name, referrer_id)
-
-            # Обработка реферера
-            if referrer_id and referrer_id != user_dat.tgid:
-                # Пользователь пришел по реферальной ссылке, обрабатываем это
-                referrerUser = await User.GetInfo(referrer_id)
-
-                comingUserInfo = message.from_user.full_name
-                if str(message.from_user.username) != 'None':
-                    comingUserInfo = comingUserInfo + ' ( ' + username + ' )'
-
-                await bot.send_message(referrer_id,
-                                       f"По вашей ссылке пришел новый пользователь: {comingUserInfo}\nВы получите +1 месяц бесплатного доступа, если он оплатит подписку",
-                                       reply_markup=await main_buttons(referrerUser))
-
-                for admin in CONFIG["admin_tg_id"]:
-                    await bot.send_message(admin,
-                                           f"По ссылке от пользователя {referrerUser.username} ( {referrer_id} ) пришел новый пользователь: {comingUserInfo}")
-
-            # Приветствуем нового пользователя (реферала)
-            user_dat = await User.GetInfo(message.chat.id)
-            trialText = e.emojize(f"Привет, {user_dat.fullname}!\n\r\n\r" \
-                                  f"🎁 <b>Дарим вам 7 дней бесплатного доступа!</b>\n\r\n\r" \
-                                  f"Пожалуйста, выберите тип телефона или планшета, для которого нужна инструкция для подключения:\n\r")
-
-            trialButtons = await getTrialButtons()
-            await bot.send_message(message.chat.id, trialText, parse_mode="HTML", reply_markup=trialButtons)
-
-            await addUser(message.from_user.id, username)
-
+            await startSendNotRegistered(message.chat.id, message.from_user.username, message.from_user.full_name, message.text)
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
 async def Work_with_Message(m: types.Message):
