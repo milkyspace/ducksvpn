@@ -1358,23 +1358,22 @@ async def Work_with_Message(m: types.Message):
             user_dat = await User.GetInfo(m.from_user.id)
             allusers = await user_dat.GetAllUsersWithoutSub()
 
-            # for i in allusers:
-            #     try:
-            activateButtons = types.InlineKeyboardMarkup(row_width=1)
-            activateButtons.add(
-                types.InlineKeyboardButton(emoji.emojize(f"Активировать подписку :dizzy:"),
-                                           callback_data="toActivatePromo:3daysToInactive"),
-                types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
-                                           url=SUPPORT_LINK)
-            )
-            await bot.send_message(187433643, emoji.emojize(texts_for_bot["not_active_activate"]),
-                                   parse_mode="HTML",
-                                   reply_markup=activateButtons)
-
-                # except Exception as err:
-                #     print(err)
-                #     print(traceback.format_exc())
-                #     pass
+            for i in allusers:
+                try:
+                    activateButtons = types.InlineKeyboardMarkup(row_width=1)
+                    activateButtons.add(
+                        types.InlineKeyboardButton(emoji.emojize(f"Активировать подписку :dizzy:"),
+                                                   callback_data="toActivatePromo:3daysToInactive"),
+                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                                   url=SUPPORT_LINK)
+                    )
+                    await bot.send_message(i['tgid'], emoji.emojize(texts_for_bot["not_active_activate"]),
+                                           parse_mode="HTML",
+                                           reply_markup=activateButtons)
+                except Exception as err:
+                    print(err)
+                    print(traceback.format_exc())
+                    pass
 
             await bot.delete_state(m.from_user.id)
             await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
