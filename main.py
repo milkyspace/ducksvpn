@@ -600,7 +600,7 @@ async def start(message: types.Message):
                 print('gift send')
                 async with bot.retrieve_data(message.chat.id) as data:
                     print(message.text)
-                    data['giftid'] = message.text.replace('gift', '')
+                    data['giftid'] = message.text.replace('/start gift', '')
                 await bot.send_message(message.chat.id, f'Для вас подготовлен подарок! :wrapped_gift:',
                                        parse_mode="HTML",
                                        reply_markup=await main_buttons(user_dat))
