@@ -599,6 +599,7 @@ async def start(message: types.Message):
             if message.text.find('gift') >= 0:
                 print('gift send')
                 async with bot.retrieve_data(message.chat.id) as data:
+                    print(message.text)
                     data['giftid'] = message.text.replace('gift', '')
                 await bot.send_message(message.chat.id, f'Для вас подготовлен подарок! :wrapped_gift:',
                                        parse_mode="HTML",
