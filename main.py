@@ -709,7 +709,7 @@ async def Work_with_Message(m: types.Message):
                 monthText = str(monthСount) + ' месяцев'
 
             await bot.send_message(m.from_user.id, e.emojize(f'<b>Поздравляем!</b>\r\n\r\n'
-                                                             f'Подарок на {monthText} активирован :wrapped_gift:'),
+                                                             f'Подарок на {monthText} подписки на VPN DUCKS активирован :wrapped_gift:'),
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
 
