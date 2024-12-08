@@ -1408,6 +1408,7 @@ async def PayBlock(call: types.CallbackQuery):
 
 @bot.callback_query_handler(func=lambda c: 'BuyMonth:' in c.data)
 async def Buy_month(call: types.CallbackQuery):
+    print('Buy_month start')
     user_dat = await User.GetInfo(call.from_user.id)
     payment_info = await user_dat.PaymentInfo()
 
@@ -1419,6 +1420,7 @@ async def Buy_month(call: types.CallbackQuery):
     if 2 in split:
         additional = int(str(call.data).split(":")[2])
 
+    print('additional ' + str(additional))
     try:
         await bot.delete_message(call.message.chat.id, call.message.id)
     except:
