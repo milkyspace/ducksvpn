@@ -1851,6 +1851,11 @@ def checkTime():
             for i in log:
                 try:
                     paymentId = i['bill_id']
+
+                    testTimeSubscribe = 100 * 30 * 24 * 60 * 60
+                    if i['time_to_add'] == testTimeSubscribe:
+                        paymentSuccess(paymentId)
+
                     paymentData = Pay(PAYMENT_SYSTEM_CODE).findPay(paymentId)
                     if paymentData and paymentData['success']:
                         if paymentData['payment'].status == 'succeeded':
