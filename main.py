@@ -1394,7 +1394,7 @@ async def Work_with_Message(m: types.Message):
                                        url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
             types.InlineKeyboardButton(e.emojize(":video_camera: Не работает TikTok?"), callback_data="Help:TIKTOK"),
-            types.InlineKeyboardButton(e.emojize(":gift: Подарить подписку"), callback_data="Help:GIFT"),
+            types.InlineKeyboardButton(e.emojize(":wrapped_gift: Подарить подписку"), callback_data="Help:GIFT"),
         )
         if user_dat.type == 'amnezia':
             helpButtons.add(
