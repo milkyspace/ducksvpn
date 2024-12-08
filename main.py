@@ -633,6 +633,7 @@ async def Work_with_Message(m: types.Message):
         giftId = data['giftid']
 
     secretCode = m.text
+    print('secretCode: ' + secretCode)
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
