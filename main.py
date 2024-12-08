@@ -656,9 +656,9 @@ async def Work_with_Message(m: types.Message):
             if not userDat.registered:
                 await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
             addTimeSubscribe = paymentLog['time_to_add']
-            await AddTimeToUser(m.chat.id, addTimeSubscribe)
-            await bot.send_message(m.from_user.id, f'<b>Поздравляем!</b>\r\n'
-                                                   f'Подарок активирован :wrapped_gift:',
+            AddTimeToUserSync(m.chat.id, addTimeSubscribe)
+            await bot.send_message(m.from_user.id, e.demojize(f'<b>Поздравляем!</b>\r\n'
+                                                   f'Подарок активирован :wrapped_gift:'),
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
 
