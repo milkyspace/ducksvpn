@@ -158,8 +158,11 @@ async def sendPayMessage(chatId, additionalParam=''):
 
 
 async def sendConfig(chatId):
+    print('sendConfig get user_dat start')
     user_dat = await User.GetInfo(chatId)
+    print('sendConfig get user_dat stop')
     if user_dat.trial_subscription == False:
+        print('sendConfig send_message')
         await bot.send_message(chat_id=chatId,
                                text=f"Пожалуйста, выберите тип устройства, для которого нужна инструкция для подключения:",
                                parse_mode="HTML", reply_markup=await getTrialButtons())
@@ -1257,7 +1260,9 @@ async def Work_with_Message(m: types.Message):
                                texts_for_bot["hello_message"],
                                parse_mode="HTML", reply_markup=await main_buttons(user_dat))
         return
+    print('user_dat.CheckNewNickname start')
     await user_dat.CheckNewNickname(m)
+    print('user_dat.CheckNewNickname stop')
 
     if (e.demojize(m.text) == "Наши преимущества :gem_stone:"
             or e.demojize(m.text) == "Почему стоит выбрать нас? :smiling_face_with_sunglasses:"):
@@ -1466,6 +1471,7 @@ async def Work_with_Message(m: types.Message):
         return
 
     if e.demojize(m.text) == "Как подключить :gear:":
+        print('Как подключить :gear:')
         await sendConfig(m.chat.id)
         return
 
