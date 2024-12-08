@@ -1514,8 +1514,8 @@ async def Buy_month(call: types.CallbackQuery):
     monthСount = int(split[1])
 
     additional = ''
-    if len(split) > 1:
-        additional = str(call.data).split(":")[2]
+    # if len(split) > 1:
+    #     additional = str(call.data).split(":")[2]
 
     print('additional ' + str(additional))
     try:
