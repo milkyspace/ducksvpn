@@ -463,13 +463,14 @@ def paymentSuccess(paymentId):
         giftId = asyncio.run(user_dat.newGift(tgid, paymentId, secret))
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
 
-        giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift_' + str(giftId)
+        giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift' + str(giftId)
         msg = e.emojize(f"<b>Ссылка на подарок и секретный код активации</b>\n\r\n\r" \
                         f":wrapped_gift: Скопируйте ссылку на подарок и отправьте её получателю.\n\r" \
-                        f"Обязательно передайте получателю подарка секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r" \
-                        f"<b><code>{secret}</code></b>\n\r\n\r" \
                         f"Когда обладатель подарка перейдет по ссылке, мы поздравим его и продлим его подписку VPN Ducks!\n\r\n\r" \
-                        f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{giftLink}</code></b>")
+                        f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{giftLink}</code></b>\n\r\n\r" \
+                        f"Обязательно передайте получателю подарка секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r" \
+                        f"<b><code>{secret}</code></b>"
+                        )
         BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
                               parse_mode="HTML")
         return
@@ -663,8 +664,8 @@ async def Work_with_Message(m: types.Message):
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"update gifts set status='success' where id = %s",
-                          (giftId))
+            dbCur.execute(f"update gifts set status='success', recipient_tgid=%s where id = %s",
+                          (m.chat.id, giftId))
             conn.commit()
             dbCur.close()
             conn.close()
@@ -1472,7 +1473,8 @@ async def Init(call: types.CallbackQuery):
                                parse_mode="HTML")
         await sendConfigAndInstructions(user_dat.tgid, 'tiktok', 'xui')
     elif command == 'GIFT':
-        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Выберите продолжительность подписки, которую хотите подарить 🙌🏻"),
+        await bot.send_message(chat_id=user_dat.tgid,
+                               text=e.emojize(f"Выберите продолжительность подписки, которую хотите подарить 🙌🏻"),
                                parse_mode="HTML")
         await sendPayMessage(user_dat.tgid, 'gift')
     else:
