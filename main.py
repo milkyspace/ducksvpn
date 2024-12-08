@@ -1847,7 +1847,7 @@ def checkTime():
             dbCur.close()
             conn.close()
 
-            testTimeSubscribe = 101 * 30 * 24 * 60 * 60
+            testTimeSubscribe = 100 * 30 * 24 * 60 * 60
 
             for i in log:
                 try:
