@@ -687,7 +687,7 @@ async def Work_with_Message(m: types.Message):
     if giftLog is not None:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"select * from payments where id = %s limit 1",
+        dbCur.execute(f"select * from payments where id = %s and additional='gift' limit 1",
                       (giftLog['payment_id']))
         paymentLog = dbCur.fetchone()
         dbCur.close()
