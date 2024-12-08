@@ -1353,6 +1353,33 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
+        if e.demojize(
+                m.text) == "Отправить сообщение всем неактивным пользователям (с кнопкой Активировать подписку) :pencil:":
+            user_dat = await User.GetInfo(m.from_user.id)
+            allusers = await user_dat.GetAllUsersWithoutSub()
+
+            # for i in allusers:
+            #     try:
+            activateButtons = types.InlineKeyboardMarkup(row_width=1)
+            activateButtons.add(
+                types.InlineKeyboardButton(emoji.emojize(f"Активировать подписку :dizzy:"),
+                                           callback_data="toActivatePromo:3daysToInactive"),
+                types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                           url=SUPPORT_LINK)
+            )
+            await bot.send_message(187433643, emoji.emojize(texts_for_bot["not_active_activate"]),
+                                   parse_mode="HTML",
+                                   reply_markup=activateButtons)
+
+                # except Exception as err:
+                #     print(err)
+                #     print(traceback.format_exc())
+                #     pass
+
+            await bot.delete_state(m.from_user.id)
+            await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+            return
+
         if e.demojize(m.text) == "Отправить напоминание о службе поддержки :pencil:":
             user_dat = await User.GetInfo(m.from_user.id)
             allusers = await user_dat.GetAllUsers()
@@ -1567,6 +1594,59 @@ async def Referrer(call: types.CallbackQuery):
                     f"\n\r\n\rПользователей, пришедших по вашей ссылке: {str(countReferal)}")
 
     await bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
+
+
+@bot.callback_query_handler(func=lambda c: 'toActivatePromo:' in c.data)
+async def toActivatePromo(call: types.CallbackQuery):
+    userDat = await User.GetInfo(call.from_user.id)
+
+    promo = str(call.data).split(":")[1]
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"select * from promo where code = %s order by id desc limit 1",
+                  (promo))
+    promoLog = dbCur.fetchone()
+    dbCur.close()
+    conn.close()
+
+    if promoLog is not None:
+        await bot.send_message(chat_id=userDat.tgid, text="Такой акции уже нет :)",
+                               reply_markup=await main_buttons(userDat))
+        await bot.delete_state(userDat.tgid)
+        return
+
+    daysToAdd = promoLog['days_to_add']
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"select * from promo_activations where code = %s and tgid = %s order by id desc limit 1",
+                  (promo, userDat.tgid))
+    promoActivationLog = dbCur.fetchone()
+    dbCur.close()
+    conn.close()
+
+    if promoActivationLog is not None:
+        await bot.send_message(chat_id=userDat.tgid, text="Вы уже участвовали в этой акции :)",
+                               reply_markup=await main_buttons(userDat))
+        await bot.delete_state(userDat.tgid)
+        return
+
+    await AddTimeToUserAsync(userDat.tgid, int(daysToAdd) * 24 * 60 * 60)
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(
+        f"insert into promo_activations (tgid,code) values (%s,%s)",
+        (userDat.tgid, promo))
+    conn.commit()
+    dbCur.close()
+    conn.close()
+
+    promoText = e.emojize(f"🎁 <b>Дарим вам {daysToAdd} дня бесплатного доступа!</b>\n\r\n\r" \
+                          f"Пожалуйста, выберите тип телефона или планшета, для которого нужна инструкция для подключения:\n\r")
+    trialButtons = await getTrialButtons()
+    await bot.send_message(userDat.tgid, promoText, parse_mode="HTML", reply_markup=trialButtons)
 
 
 @bot.callback_query_handler(func=lambda c: 'PayBlock' in c.data)
