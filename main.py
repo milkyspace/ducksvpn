@@ -1513,7 +1513,10 @@ async def Buy_month(call: types.CallbackQuery):
 
     additional = ''
     print(split)
+    if 'gift' in split:
+        print('if gift in split')
     if 2 in split:
+        print('if 2 in split')
         additional = int(str(call.data).split(":")[2])
 
     print('additional ' + str(additional))
