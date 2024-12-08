@@ -460,7 +460,7 @@ def paymentSuccess(paymentId):
 
     if additional == 'gift':
         secret = randomword(10)
-        giftId = asyncio.run(user_dat.newGift(tgid, paymentId, secret))
+        giftId = asyncio.run(user_dat.newGift(paymentId, secret))
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
 
         giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift' + str(giftId)
