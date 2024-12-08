@@ -132,6 +132,8 @@ async def sendPayMessage(chatId, additionalParam=''):
     if additionalParam != '':
         additionalParam = ':' + additionalParam
 
+    print(additionalParam)
+
     if chatId in CONFIG["admin_tg_id"]:
         Butt_payment.add(
             types.InlineKeyboardButton(e.emojize(f"Проверка оплаты: {int(getCostBySale(100))} руб."),
@@ -1472,7 +1474,7 @@ async def Init(call: types.CallbackQuery):
                                parse_mode="HTML")
         await sendConfigAndInstructions(user_dat.tgid, 'tiktok', 'xui')
     elif command == 'GIFT':
-        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Выберите продолжительность подписки 🙌🏻"),
+        await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(f"Выберите продолжительность подписки, которую хотите подарить 🙌🏻"),
                                parse_mode="HTML")
         await sendPayMessage(user_dat.tgid, 'gift')
     else:
