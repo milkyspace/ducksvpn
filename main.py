@@ -1413,7 +1413,8 @@ async def Buy_month(call: types.CallbackQuery):
 
     monthСount = int(str(call.data).split(":")[1])
 
-    additional = int(str(call.data).split(":")[2])
+    # additional = int(str(call.data).split(":")[2])
+    additional = 0
 
     try:
         await bot.delete_message(call.message.chat.id, call.message.id)
