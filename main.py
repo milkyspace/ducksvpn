@@ -587,12 +587,6 @@ async def start(message: types.Message):
         await bot.delete_state(message.from_user.id)
         user_dat = await User.GetInfo(message.chat.id)
 
-        if user_dat.registered:
-            await startSendRegistered(message.chat.id)
-        else:
-            await startSendNotRegistered(message.chat.id, message.from_user.username, message.from_user.full_name,
-                                         message.text)
-
         print('gift start')
         print(message.text)
         try:
@@ -603,7 +597,7 @@ async def start(message: types.Message):
                 async with bot.retrieve_data(message.from_user.id) as data:
                     data['giftid'] = message.text.replace('/start gift', '')
 
-                await bot.send_message(message.chat.id, f'Для вас подготовлен подарок! :wrapped_gift:',
+                await bot.send_message(message.chat.id, e.emojize(f'Для вас подготовлен подарок! :wrapped_gift:'),
                                        parse_mode="HTML",
                                        reply_markup=await main_buttons(user_dat))
                 buttSkip = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -616,6 +610,12 @@ async def start(message: types.Message):
             print(err)
             print(traceback.format_exc())
             pass
+
+        if user_dat.registered:
+            await startSendRegistered(message.chat.id)
+        else:
+            await startSendNotRegistered(message.chat.id, message.from_user.username, message.from_user.full_name,
+                                         message.text)
 
 
 @bot.message_handler(state=MyStates.EnterGiftSecret, content_types=["text"])
