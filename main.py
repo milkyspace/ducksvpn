@@ -1604,6 +1604,7 @@ async def toActivatePromo(call: types.CallbackQuery):
                            reply_markup=await main_buttons(userDat))
 
     promo = str(call.data).split(":")[1]
+    print(promo)
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
