@@ -110,6 +110,8 @@ class MyStates(StatesGroup):
 
     AdminNewUser = State()
 
+    EnterGiftSecret = State()
+
 
 async def getTrialButtons():
     trialButtons = types.InlineKeyboardMarkup(row_width=1)
@@ -522,6 +524,7 @@ def paymentSuccess(paymentId):
         print(traceback.format_exc())
         pass
 
+
 async def startSendRegistered(tgId):
     user_dat = await User.GetInfo(tgId)
     await sendConfig(tgId)
@@ -529,7 +532,8 @@ async def startSendRegistered(tgId):
                            parse_mode="HTML",
                            reply_markup=await main_buttons(user_dat))
 
-async def startSendNotRegistered(tgId, userName, fullName, messageText = ''):
+
+async def startSendNotRegistered(tgId, userName, fullName, messageText=''):
     user_dat = await User.GetInfo(tgId)
 
     try:
@@ -576,26 +580,77 @@ async def startSendNotRegistered(tgId, userName, fullName, messageText = ''):
 
     await addUser(tgId, username)
 
+
 @bot.message_handler(commands=['start'])
 async def start(message: types.Message):
     if message.chat.type == "private":
         await bot.delete_state(message.from_user.id)
         user_dat = await User.GetInfo(message.chat.id)
 
+        if user_dat.registered:
+            await startSendRegistered(message.chat.id)
+        else:
+            await startSendNotRegistered(message.chat.id, message.from_user.username, message.from_user.full_name,
+                                         message.text)
+
         print('gift start')
         print(message.text)
         if message.text.find('gift') >= 0:
             print('gift send')
-            await bot.send_message(message.chat.id, message.text,
+            async with bot.retrieve_data(message.chat.id) as data:
+                data['giftid'] = message.text.replace('gift', '')
+            await bot.send_message(message.chat.id, f'Для вас подготовлен подарок! :wrapped_gift:',
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(user_dat))
+            await bot.set_state(message.chat.id, MyStates.EnterGiftSecret)
+            buttSkip = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            buttSkip.add(types.KeyboardButton(e.emojize(f"Отменить :right_arrow_curving_left:")))
+            await bot.send_message(message.chat.id, "Введите секретный код подарка:", reply_markup=buttSkip)
             return
         print('gift stop')
 
-        if user_dat.registered:
-            await startSendRegistered(message.chat.id)
-        else:
-            await startSendNotRegistered(message.chat.id, message.from_user.username, message.from_user.full_name, message.text)
+
+@bot.message_handler(state=MyStates.EnterGiftSecret, content_types=["text"])
+async def Work_with_Message(m: types.Message):
+    userDat = await User.GetInfo(m.from_user.id)
+    if e.demojize(m.text) == "Отменить :right_arrow_curving_left:":
+        await bot.reset_data(m.from_user.id)
+        await bot.delete_state(m.from_user.id)
+        await bot.send_message(m.from_user.id, "Вернули вас назад!", reply_markup=await buttons.admin_buttons())
+        if not userDat.registered:
+            await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name)
+        return
+
+    giftId = 0
+    async with bot.retrieve_data(m.from_user.id) as data:
+        giftId = data['giftid']
+
+    secretCode = m.text
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"select * from gifts where id = %s and secret=false limit 1",
+                  (giftId, secretCode))
+    giftLog = dbCur.fetchone()
+    dbCur.close()
+    conn.close()
+
+    if giftLog is None:
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"select * from payments where id = %s limit 1",
+                      (giftLog['payment_id']))
+        paymentLog = dbCur.fetchone()
+        dbCur.close()
+        conn.close()
+        if paymentLog is None:
+            addTimeSubscribe = paymentLog['time_to_add']
+            await AddTimeToUser(m.chat.id, addTimeSubscribe)
+            await bot.send_message(m.from_user.id, f'<b>Поздравляем!</b>\r\n'
+                                                   f'Подарок активирован :wrapped_gift:',
+                                   parse_mode="HTML",
+                                   reply_markup=await main_buttons(userDat, True))
+
 
 @bot.message_handler(state=MyStates.editUser, content_types=["text"])
 async def Work_with_Message(m: types.Message):
