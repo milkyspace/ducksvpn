@@ -1370,6 +1370,16 @@ async def Work_with_Message(m: types.Message):
                     await bot.send_message(i['tgid'], emoji.emojize(texts_for_bot["not_active_activate"]),
                                            parse_mode="HTML",
                                            reply_markup=activateButtons)
+
+                except ApiTelegramException as exception:
+                    if (exception.description == 'Forbidden: bot was blocked by the user'):
+                        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                        dbCur.execute(f"Update userss set blocked=true where tgid=%s", (i['tgid']))
+                        conn.commit()
+                        dbCur.close()
+                        conn.close()
+                    pass
                 except Exception as err:
                     print(err)
                     print(traceback.format_exc())
