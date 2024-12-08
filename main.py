@@ -382,6 +382,7 @@ def AddTimeToUserSync(tgid, timetoadd):
             'Информация о подписке обновлена'), parse_mode="HTML",
                               reply_markup=asyncio.run(main_buttons(userdat, True)))
 
+
 async def AddTimeToUserAsync(tgid, timetoadd):
     userdat = await User.GetInfo(tgid)
     if userdat.subscription == None:
@@ -400,7 +401,7 @@ async def AddTimeToUserAsync(tgid, timetoadd):
 
         await bot.send_message(userdat.tgid, e.emojize(
             f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
-                              parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
+                               parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
     else:
         conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
         dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -413,7 +414,7 @@ async def AddTimeToUserAsync(tgid, timetoadd):
         await switchUserActivity(str(userdat.tgid), True)
         await bot.send_message(userdat.tgid, e.emojize(
             'Информация о подписке обновлена'), parse_mode="HTML",
-                              reply_markup=await main_buttons(userdat, True))
+                               reply_markup=await main_buttons(userdat, True))
 
 
 def getCostBySale(month):
@@ -696,10 +697,27 @@ async def Work_with_Message(m: types.Message):
                 await startSendNotRegistered(m.chat.id, m.from_user.username, m.from_user.full_name, '/start')
             addTimeSubscribe = paymentLog['time_to_add']
             await AddTimeToUserAsync(m.chat.id, addTimeSubscribe)
-            await bot.send_message(m.from_user.id, e.demojize(f'<b>Поздравляем!</b>\r\n'
-                                                   f'Подарок активирован :wrapped_gift:'),
+
+            monthСount = int(addTimeSubscribe / (30 * 24 * 60 * 60))
+            if monthСount == 1:
+                monthText = '1 месяц'
+            elif monthСount == 12:
+                monthText = '1 год'
+            else:
+                monthText = str(monthСount) + ' месяцев'
+
+            await bot.send_message(m.from_user.id, e.emojize(f'<b>Поздравляем!</b>\r\n\r\n'
+                                                             f'Подарок на {monthText} активирован :wrapped_gift:'),
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
+
+            Butt_reffer = types.InlineKeyboardMarkup()
+            Butt_reffer.add(
+                types.InlineKeyboardButton(
+                    e.emojize(f"Пригласить друга :wrapped_gift:"),
+                    callback_data="Referrer"))
+            BotCheck.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
+                                  reply_markup=Butt_reffer, parse_mode="HTML")
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -1520,7 +1538,8 @@ async def Init(call: types.CallbackQuery):
                                               ),
                                parse_mode="HTML")
         await bot.send_message(chat_id=user_dat.tgid,
-                               text=e.emojize(f"Выберите продолжительность подписки, которую хотите подарить :wrapped_gift:"),
+                               text=e.emojize(
+                                   f"Выберите продолжительность подписки, которую хотите подарить :wrapped_gift:"),
                                parse_mode="HTML")
         await sendPayMessage(user_dat.tgid, 'gift')
     else:
