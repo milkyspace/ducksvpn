@@ -1600,6 +1600,9 @@ async def Referrer(call: types.CallbackQuery):
 async def toActivatePromo(call: types.CallbackQuery):
     userDat = await User.GetInfo(call.from_user.id)
 
+    await bot.send_message(chat_id=userDat.tgid, text="Подождите... Подписка активируется...",
+                           reply_markup=await main_buttons(userDat))
+
     promo = str(call.data).split(":")[1]
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
