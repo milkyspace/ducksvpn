@@ -177,11 +177,27 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
     tgId = str(user_dat.tgid)
 
     if type == 'xui':
-        connectionLinks = await getConnectionLinks(tgId, device)
-        print(connectionLinks)
-        if connectionLinks['success'] != True:
-            sleep(5)
+
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"select * from users_keys where tgid = %s and type = %s order by id desc limit 1",
+                      (tgId, device))
+        userKeyLog = dbCur.fetchone()
+        dbCur.close()
+        conn.close()
+
+        if userKeyLog is not None and userKeyLog['user_key']:
+            connectionLinks = {
+                'success': True,
+                'data': {
+                    'link': userKeyLog['user_key']
+                },
+            }
+        else:
             connectionLinks = await getConnectionLinks(tgId, device)
+            if connectionLinks['success'] != True:
+                connectionLinks = await getConnectionLinks(tgId, device)
+
         if connectionLinks['success']:
             data = connectionLinks['data']
             link = data['link']
