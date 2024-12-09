@@ -1667,6 +1667,11 @@ async def toActivatePromo(call: types.CallbackQuery):
     trialButtons = await getTrialButtons()
     await bot.send_message(userDat.tgid, promoText, parse_mode="HTML", reply_markup=trialButtons)
 
+    for admin in CONFIG["admin_tg_id"]:
+        BotCheck.send_message(admin,
+                              f"Пользователь {userDat.username} ({userDat.tgid}) активировал промо-акцию {promo}",
+                              parse_mode="HTML")
+
 
 @bot.callback_query_handler(func=lambda c: 'PayBlock' in c.data)
 async def PayBlock(call: types.CallbackQuery):
