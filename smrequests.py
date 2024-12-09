@@ -69,7 +69,9 @@ async def getConnectionLinks(tgId, keyType='default'):
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
                                      "Authorization": token}, timeout=120, verify=False)
+    print('getConnectionLinks stop')
     if response:
+        print('getConnectionLinks response success')
         jsonResponse = response.json()
         data = jsonResponse['data']
         link = data['link']
@@ -83,6 +85,7 @@ async def getConnectionLinks(tgId, keyType='default'):
             }
         }
     else:
+        print('getConnectionLinks response NOT success')
         return {
             'success': False,
             'data': {}
