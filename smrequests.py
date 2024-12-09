@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 import requests
 import json
-import aiohttp
 
 load_dotenv()
 
@@ -42,16 +41,22 @@ async def getToken():
 
 async def addUser(userid, username, type=''):
     token = f"Bearer {await getToken()}"
-    async with aiohttp.ClientSession(headers={"Accept": "application/json",
+    response = requests.post(
+        f"{SERVER_MANAGER_URL}/vpnservers",
+        headers={"Accept": "application/json",
                  "Content-Type": "application/json",
-                 "Authorization": token}) as session:
-        async with session.post(url=f"{SERVER_MANAGER_URL}/vpnservers", data=json.dumps({
+                 "Authorization": token},
+        data=json.dumps({
             "id": str(userid),
             "name": str(username),
             "limit_ip": 3,
             "type": type,
-        })) as response:
-            await response
+        }), timeout=120, verify=False)
+
+    if response:
+        return True
+
+    return False
 
 
 async def getConnectionLinks(tgId, keyType='default'):
