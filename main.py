@@ -647,7 +647,7 @@ async def startSendNotRegistered(tgId, userName, fullName, messageText=''):
     trialButtons = await getTrialButtons()
     await bot.send_message(tgId, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
-    asyncio.get_event_loop().run_until_complete(addUser(tgId, username))
+    await addUser(tgId, username)
 
 
 @bot.message_handler(commands=['start'])
@@ -1279,7 +1279,7 @@ async def Work_with_Message(m: types.Message):
         referrer_id = arg_referrer_id if arg_referrer_id != user_dat.tgid else 0
 
         await user_dat.Adduser(m.chat.id, username, m.from_user.full_name, referrer_id)
-        asyncio.get_event_loop().run_until_complete(addUser(m.chat.id, username))
+        await addUser(m.chat.id, username)
 
         await bot.send_message(m.chat.id,
                                texts_for_bot["hello_message"],
@@ -1558,8 +1558,6 @@ async def Init(call: types.CallbackQuery):
     device = str(call.data).split(":")[1]
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await addUser(user_dat.tgid, user_dat.username)
-    asyncio.get_event_loop().run_until_complete(addUser(user_dat.tgid, user_dat.username))
-
     await bot.answer_callback_query(call.id)
 
 
@@ -1576,8 +1574,7 @@ async def Init(call: types.CallbackQuery):
         isTypeChanged = await user_dat.changeType()
         if isTypeChanged:
             userDatNew = await User.GetInfo(call.from_user.id)
-            asyncio.get_event_loop().run_until_complete(addUser(userDatNew.tgid, userDatNew.username, userDatNew.type))
-
+            await addUser(userDatNew.tgid, userDatNew.username, userDatNew.type)
             await bot.send_message(userDatNew.tgid,
                                    e.emojize(
                                        'Протокол изменен.\nДля подключения нажмите на кнопку Как подключить :gear:'),
