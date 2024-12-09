@@ -202,7 +202,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             data = connectionLinks['data']
             link = data['link']
 
-            if userKeyLog is None:
+            if userKeyLog is None and link:
                 conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                 dbCur = conn.cursor(pymysql.cursors.DictCursor)
                 dbCur.execute(f"insert into users_keys (tgid,type,user_key) values (%s,%s,%s)",
