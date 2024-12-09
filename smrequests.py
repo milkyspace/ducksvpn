@@ -60,6 +60,7 @@ async def addUser(userid, username, type=''):
 
 
 async def getConnectionLinks(tgId, keyType='default'):
+    print('getConnectionLinks start')
     token = f"Bearer {await getToken()}"
     requestAddress = f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getLink/{keyType}"
     if keyType == 'TikTok':
