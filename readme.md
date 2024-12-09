@@ -32,9 +32,6 @@ chmod u+x install.sh
 
 mysql -u root -p
   # CREATE DATABASE ducksvpn;
-  # GRANT ALL ON my_test_db.* TO 'admin'@'localhost' IDENTIFIED BY 'adminpassword' WITH GRANT OPTION;
-  # FLUSH PRIVILEGES;
-  # exit;
 
 mysql -u admin -p adminpassword
   # use ducksvpn
@@ -44,6 +41,10 @@ mysql -u admin -p adminpassword
   # CREATE TABLE IF NOT EXISTS gifts (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, sender_tgid varchar(50), recipient_tgid varchar(50), payment_id text, status varchar(50), secret text, time DATETIME DEFAULT CURRENT_TIMESTAMP);
   # CREATE TABLE IF NOT EXISTS promo (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, code varchar(50), days_to_add int, time DATETIME DEFAULT CURRENT_TIMESTAMP);
   # CREATE TABLE IF NOT EXISTS promo_activations (id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, code varchar(50), tgid varchar(50), time DATETIME DEFAULT CURRENT_TIMESTAMP);
+
+  # GRANT ALL ON {my_test_db}.* TO '{admin}'@'localhost' IDENTIFIED BY '{adminpassword}' WITH GRANT OPTION;
+  # FLUSH PRIVILEGES;
+  # exit;
 ```
 
 ## Setting up a vpn server (any number)
@@ -121,9 +122,8 @@ alias dvpn="sudo systemctl stop ducksVpnTelegram && sudo systemctl start ducksVp
 alias dvpnstatus="sudo systemctl status ducksVpnTelegram"
 alias dvpnstop="sudo systemctl stop ducksVpnTelegram"
 alias dvpntest="python3 /var/www/ducksvpn/main.py"
-alias dvpnmysql="mysql -u User -pPassword"
+alias dvpnmysql="mysql -u {User} -p{Password}"
 alias dvpndir="cd /var/www/ducksvpn"
-alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
 ```
 
 ## License
