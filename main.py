@@ -202,13 +202,14 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             data = connectionLinks['data']
             link = data['link']
 
-            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-            dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"insert into users_keys (tgid,type,user_key) values (%s,%s,%s)",
-                          (tgId, device, link))
-            conn.commit()
-            dbCur.close()
-            conn.close()
+            if userKeyLog is None:
+                conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                dbCur.execute(f"insert into users_keys (tgid,type,user_key) values (%s,%s,%s)",
+                              (tgId, device, link))
+                conn.commit()
+                dbCur.close()
+                conn.close()
 
             instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a> (если это приложение вам не подойдет, <a href=\"https://apps.apple.com/ru/app/v2raytun/id6476628951\">установите v2RayTun</a>)\n\r" \
                                 f"2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже и вставьте в приложение Streisand, нажмите кнопку ➕ вверху, и затем \"Добавить из буфера\"\n\r" \
