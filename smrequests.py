@@ -51,7 +51,7 @@ async def addUser(userid, username, type=''):
             "name": str(username),
             "limit_ip": 3,
             "type": type,
-        }), timeout=120, verify=False)
+        }), timeout=10, verify=False)
 
     if response:
         return True
@@ -68,7 +68,7 @@ async def getConnectionLinks(tgId, keyType='default'):
     response = requests.get(requestAddress,
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
-                                     "Authorization": token}, timeout=120, verify=False)
+                                     "Authorization": token}, timeout=10, verify=False)
     print('getConnectionLinks stop')
     if response:
         print('getConnectionLinks response success')
@@ -97,7 +97,7 @@ async def getAmneziaConnectionFile(tgId):
     response = requests.get(f"{SERVER_MANAGER_URL}/vpnservers/{tgId}/getAmneziaFile",
                             headers={"Accept": "application/json",
                                      "Content-Type": "application/json",
-                                     "Authorization": token}, timeout=120, verify=False)
+                                     "Authorization": token}, timeout=10, verify=False)
 
     if response:
         contentDisposition = response.headers["Content-Disposition"]
@@ -142,7 +142,7 @@ async def switchUserActivity(tgid, val):
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
-        data=json.dumps(update), timeout=120, verify=False)
+        data=json.dumps(update), timeout=10, verify=False)
     print('switchUserActivity response stop')
     print(response)
     if response:
