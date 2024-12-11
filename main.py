@@ -211,6 +211,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                 dbCur.close()
                 conn.close()
 
+            additionalText = "\r\n\r\nЕсли вы подключаетесь <b>в первый раз</b>, конфигурация вашего ключа может дойти на все серверы не сразу, а с задержкой до 10 минут.\n\rЕсли впн не работает, попробуйте подождать 10 минут и переподключиться"
+
             instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a> (если это приложение вам не подойдет, <a href=\"https://apps.apple.com/ru/app/v2raytun/id6476628951\">установите v2RayTun</a>)\n\r" \
                                 f"2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже и вставьте в приложение Streisand, нажмите кнопку ➕ вверху, и затем \"Добавить из буфера\"\n\r" \
                                 f"3. Дайте разрешения приложению Streisand на вставку файла\n\r" \
@@ -223,19 +225,19 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
             instructionWindows = f"<b>Подключение VPN DUCKS на Windows</b>\n\r\n\r1. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже\n\r2. Следуйте инструкции https://telegra.ph/Instrukciya-po-ustanovke-Ducks-VPN-na-Windows-10-22\n\r\n\rЧто-то не получилось или vpn работает не стабильно? Напишите {SUPPORT_USERNAME}, мы оперативно поможем 🙌🏻"
             instructionMacOS = f"<b>Подключение VPN DUCKS на MacOS</b>\n\r\n\r1. Установите <a href='https://apps.apple.com/ru/app/foxray/id6448898396'>FoXray</a>\n\r2. Скопируйте ссылку (начинающуюся с vless://), прикрепленную ниже, перейдите в установленное в первом пункте приложение, внутри приложения импортируйте строку\n\r\n\rГотово! 🎉\n\r\n\rЧто-то не получилось или vpn работает не стабильно? Напишите {SUPPORT_USERNAME}, мы оперативно поможем 🙌🏻"
             if (device == "iPhone"):
-                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionIPhone), parse_mode="HTML",
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionIPhone + additionalText), parse_mode="HTML",
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
             if (device == "Android"):
-                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionAndroid), parse_mode="HTML",
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionAndroid + additionalText), parse_mode="HTML",
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
             if (device == "Windows"):
-                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionWindows), parse_mode="HTML",
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionWindows + additionalText), parse_mode="HTML",
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
             if (device == "MacOS"):
-                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionMacOS), parse_mode="HTML",
+                await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionMacOS  + additionalText), parse_mode="HTML",
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
 
