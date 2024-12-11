@@ -1559,8 +1559,6 @@ async def Work_with_Message(m: types.Message):
 
 @bot.callback_query_handler(func=lambda c: 'Init:' in c.data)
 async def Init(call: types.CallbackQuery):
-    await bot.send_message(chat_id=call.from_user.id, text=e.emojize(
-        f"Пожалуйста, подождите, ваш персональный ключ генерируется :locked_with_key:"), parse_mode="HTML")
     user_dat = await User.GetInfo(call.from_user.id)
     device = str(call.data).split(":")[1]
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
