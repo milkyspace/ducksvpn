@@ -2109,7 +2109,7 @@ def checkTime():
             pass
 
 
-def checkQueue():
+async def checkQueue():
     while True:
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -2150,10 +2150,10 @@ def checkQueue():
             print(traceback.format_exc())
             pass
 
-        time.sleep(30)
+        asyncio.sleep(30)
 
 
-def checkUsers():
+async def checkUsers():
     while True:
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -2184,7 +2184,8 @@ def checkUsers():
             print(traceback.format_exc())
             pass
 
-        time.sleep(120)
+        asyncio.sleep(120)
+
 
 def checkBackup():
     while True:
@@ -2211,10 +2212,8 @@ if __name__ == '__main__':
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
 
-    # threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1", daemon=True)
-    # threadcheckQueue.start()
-    # threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
-    # threadcheckUsers.start()
+    asyncio.run(checkQueue())
+    asyncio.run(checkUsers())
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
