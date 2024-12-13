@@ -2110,48 +2110,45 @@ def checkTime():
 
 
 async def checkQueue():
-    while True:
-        print('run loop checkQueue')
-        try:
-            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-            dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success'")
-            log = dbCur.fetchall()
-            dbCur.close()
-            conn.close()
+    print('run loop checkQueue')
+    try:
+        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+        dbCur = conn.cursor(pymysql.cursors.DictCursor)
+        dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success'")
+        log = dbCur.fetchall()
+        dbCur.close()
+        conn.close()
 
-            for i in log:
-                result = False
+        for i in log:
+            result = False
 
-                if i['type'] == 'add_user':
-                    dataJson = i['data']
-                    data = json.loads(dataJson)
-                    tgId = data['user_id']
-                    userName = data['user_name']
-                    result = await addUser(str(tgId), str(userName))
-                if i['type'] == 'switch_user':
-                    dataJson = i['data']
-                    data = json.loads(dataJson)
-                    tgId = data['tgid']
-                    val = data['val']
-                    result = await switchUserActivity(str(tgId), val)
+            if i['type'] == 'add_user':
+                dataJson = i['data']
+                data = json.loads(dataJson)
+                tgId = data['user_id']
+                userName = data['user_name']
+                result = await addUser(str(tgId), str(userName))
+            if i['type'] == 'switch_user':
+                dataJson = i['data']
+                data = json.loads(dataJson)
+                tgId = data['tgid']
+                val = data['val']
+                result = await switchUserActivity(str(tgId), val)
 
-                if result:
-                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                    dbCur.execute(f"delete from queue where id=%s",
-                                  (i['id']))
-                    conn.commit()
-                    dbCur.close()
-                    conn.close()
+            if result:
+                conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                dbCur.execute(f"delete from queue where id=%s",
+                              (i['id']))
+                conn.commit()
+                dbCur.close()
+                conn.close()
 
-        except Exception as err:
-            print('CHECK QUEUE ERROR')
-            print(err)
-            print(traceback.format_exc())
-            pass
-
-        await asyncio.sleep(30)
+    except Exception as err:
+        print('CHECK QUEUE ERROR')
+        print(err)
+        print(traceback.format_exc())
+        pass
 
 
 async def checkUsers():
@@ -2209,8 +2206,11 @@ def checkBackup():
 
 async def runMain():
     await bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True)
-    await checkQueue()
-    await checkUsers()
+
+    while True:
+        await checkUsers()
+        await checkQueue()
+        await asyncio.sleep(60)
 
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
