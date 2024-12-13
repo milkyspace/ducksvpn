@@ -2212,8 +2212,8 @@ if __name__ == '__main__':
     threadcheckBackup.start()
     threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1")
     threadcheckQueue.start()
-    threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
-    threadcheckUsers.start()
+    # threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
+    # threadcheckUsers.start()
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
