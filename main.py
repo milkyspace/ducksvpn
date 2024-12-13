@@ -2152,7 +2152,7 @@ async def checkQueue():
             print(traceback.format_exc())
             pass
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(10)
 
 
 async def checkUsers():
