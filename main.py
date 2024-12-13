@@ -6,7 +6,7 @@ import buttons
 import dbworker
 import pay
 import smrequests
-import queue
+import queueusers
 import emoji as e
 import emoji
 import threading
@@ -30,7 +30,7 @@ from telebot.asyncio_handler_backends import State, StatesGroup
 from buttons import main_buttons
 
 from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
-from queue import addUserQueue, switchUserActivityQueue
+from queueusers import addUserQueue, switchUserActivityQueue
 from dbworker import User
 from pay import Pay
 
