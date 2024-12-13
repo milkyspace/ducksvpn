@@ -211,7 +211,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                 dbCur.close()
                 conn.close()
 
-            additionalText = ("\r\n\r\n<b>При первом подключении</b> ваш ключ может дойти на все серверы с задержкой до 10 минут." \
+            additionalText = ("\r\n\r\n<b>ВАЖНО!</b>"
+                              "\r\n<b>При первом подключении</b> ваш ключ может дойти на все серверы с задержкой до 10 минут." \
                               "\r\nПожалуйста, подождите <b>10 минут</b> и переподключитесь (выключите и включите впн в приложении)")
 
             instructionIPhone = f"<b>Подключение VPN DUCKS на iOS</b>\n\r\n\r1. Установите приложение <a href=\"https://apps.apple.com/ru/app/streisand/id6450534064\">Streisand из AppStore</a> (если это приложение вам не подойдет, <a href=\"https://apps.apple.com/ru/app/v2raytun/id6476628951\">установите v2RayTun</a>)\n\r" \
