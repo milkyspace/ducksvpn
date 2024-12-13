@@ -2219,8 +2219,7 @@ if __name__ == '__main__':
     threadcheckBackup.start()
 
     try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(runMain())
+        asyncio.run(runMain())
     except Exception as err:
         print('asyncio error')
         print(err)
