@@ -2139,7 +2139,7 @@ def checkUsers():
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                     dbCur = conn.cursor(pymysql.cursors.DictCursor)
                     dbCur.execute(f"delete from queue where id=%s",
-                                  ('success', i['id']))
+                                  (i['id']))
                     conn.commit()
                     dbCur.close()
                     conn.close()
