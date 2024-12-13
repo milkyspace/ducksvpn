@@ -6,6 +6,7 @@ import buttons
 import dbworker
 import pay
 import smrequests
+import queue
 import emoji as e
 import emoji
 import threading
@@ -29,6 +30,7 @@ from telebot.asyncio_handler_backends import State, StatesGroup
 from buttons import main_buttons
 
 from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
+from queue import addUserQueue, switchUserActivityQueue
 from dbworker import User
 from pay import Pay
 
@@ -346,6 +348,7 @@ async def AddTimeToUser(tgid, timetoadd):
         conn.close()
 
         await switchUserActivity(str(userdat.tgid), True)
+        await switchUserActivityQueue(str(userdat.tgid), True)
 
         await bot.send_message(userdat.tgid, e.emojize(
             f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
@@ -360,6 +363,7 @@ async def AddTimeToUser(tgid, timetoadd):
         conn.close()
 
         await switchUserActivity(str(userdat.tgid), True)
+        await switchUserActivityQueue(str(userdat.tgid), True)
         await bot.send_message(userdat.tgid, e.emojize(
             'Информация о подписке обновлена'), parse_mode="HTML", reply_markup=await main_buttons(userdat, True))
 
@@ -401,6 +405,7 @@ def AddTimeToUserSync(tgid, timetoadd):
         conn.close()
 
         asyncio.run(switchUserActivity(str(userdat.tgid), True))
+        asyncio.run(switchUserActivityQueue(str(userdat.tgid), True))
 
         BotCheck.send_message(userdat.tgid, e.emojize(
             f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
@@ -415,6 +420,7 @@ def AddTimeToUserSync(tgid, timetoadd):
         conn.close()
 
         asyncio.run(switchUserActivity(str(userdat.tgid), True))
+        asyncio.run(switchUserActivityQueue(str(userdat.tgid), True))
         BotCheck.send_message(userdat.tgid, e.emojize(
             'Информация о подписке обновлена'), parse_mode="HTML",
                               reply_markup=asyncio.run(main_buttons(userdat, True)))
@@ -435,6 +441,7 @@ async def AddTimeToUserAsync(tgid, timetoadd):
         conn.close()
 
         await switchUserActivity(str(userdat.tgid), True)
+        await switchUserActivityQueue(str(userdat.tgid), True)
 
         await bot.send_message(userdat.tgid, e.emojize(
             f'<b>Информация о подписке обновлена</b>\n\nНеобходимо отключить и заново включить соединение с vpn в приложении.\n\r\n\rЧто-то не получилось? Напишите нам {SUPPORT_USERNAME}'),
@@ -449,6 +456,7 @@ async def AddTimeToUserAsync(tgid, timetoadd):
         conn.close()
 
         await switchUserActivity(str(userdat.tgid), True)
+        await switchUserActivityQueue(str(userdat.tgid), True)
         await bot.send_message(userdat.tgid, e.emojize(
             'Информация о подписке обновлена'), parse_mode="HTML",
                                reply_markup=await main_buttons(userdat, True))
@@ -657,6 +665,7 @@ async def startSendNotRegistered(tgId, userName, fullName, messageText=''):
     await bot.send_message(tgId, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
     await addUser(tgId, username)
+    await addUserQueue(tgId, username)
 
 
 @bot.message_handler(commands=['start'])
@@ -1180,6 +1189,7 @@ async def Work_with_Message(m: types.Message):
                                        parse_mode="HTML")
                 if i['banned'] == False:
                     await switchUserActivity(str(i['tgid']), True)
+                    await switchUserActivityQueue(str(i['tgid']), True)
                     await bot.send_message(m.from_user.id, f"Пользователь активирован", parse_mode="HTML")
                 else:
                     await bot.send_message(m.from_user.id, f"У пользователя закончилась подписка", parse_mode="HTML")
@@ -1218,8 +1228,10 @@ async def Work_with_Message(m: types.Message):
             timenow = int(time.time())
             if int(user.subscription) < timenow:
                 await switchUserActivity(str(i['tgid']), False)
+                await switchUserActivityQueue(str(i['tgid']), False)
             if int(user.subscription) >= timenow:
                 await switchUserActivity(str(i['tgid']), True)
+                await switchUserActivityQueue(str(i['tgid']), True)
             if k % 100 == 0:
                 await bot.send_message(m.from_user.id, f"{k} пользователей отправлены в очередь",
                                        reply_markup=await buttons.admin_buttons())
@@ -1257,8 +1269,10 @@ async def Work_with_Message(m: types.Message):
             timenow = int(time.time())
             if int(user.subscription) < timenow:
                 await switchUserActivity(str(i['tgid']), False)
+                await switchUserActivityQueue(str(i['tgid']), False)
             if int(user.subscription) >= timenow:
                 await switchUserActivity(str(i['tgid']), True)
+                await switchUserActivityQueue(str(i['tgid']), True)
 
     except Exception as err:
         print('UPDATE 10 USERS ERROR')
@@ -1289,6 +1303,7 @@ async def Work_with_Message(m: types.Message):
 
         await user_dat.Adduser(m.chat.id, username, m.from_user.full_name, referrer_id)
         await addUser(m.chat.id, username)
+        await addUserQueue(m.chat.id, username)
 
         await bot.send_message(m.chat.id,
                                texts_for_bot["hello_message"],
@@ -1565,6 +1580,7 @@ async def Init(call: types.CallbackQuery):
     device = str(call.data).split(":")[1]
     await sendConfigAndInstructions(user_dat.tgid, device, user_dat.type)
     await addUser(user_dat.tgid, user_dat.username)
+    await addUserQueue(user_dat.tgid, user_dat.username)
     await bot.answer_callback_query(call.id)
 
 
@@ -1582,6 +1598,7 @@ async def Init(call: types.CallbackQuery):
         if isTypeChanged:
             userDatNew = await User.GetInfo(call.from_user.id)
             await addUser(userDatNew.tgid, userDatNew.username, userDatNew.type)
+            await addUserQueue(userDatNew.tgid, userDatNew.username, userDatNew.type)
             await bot.send_message(userDatNew.tgid,
                                    e.emojize(
                                        'Протокол изменен.\nДля подключения нажмите на кнопку Как подключить :gear:'),
@@ -1926,6 +1943,7 @@ def checkTime():
                         conn.close()
 
                         asyncio.run(switchUserActivity(str(i['tgid']), False))
+                        asyncio.run(switchUserActivityQueue(str(i['tgid']), False))
 
                         dateto = datetime.utcfromtimestamp(int(i['subscription']) + CONFIG['UTC_time'] * 3600).strftime(
                             '%d.%m.%Y %H:%M')
@@ -2096,28 +2114,37 @@ def checkUsers():
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(
-                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
+            dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success'")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
 
             for i in log:
-                print('Добавление пользователя')
-                print(i['tgid'])
-                result = asyncio.run(addUser(i['tgid'], i['username']))
-                print(result)
+                result = False
 
-            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-            dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(
-                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
-            log = dbCur.fetchall()
-            dbCur.close()
-            conn.close()
+                if i['type'] == 'add_user':
+                    dataJson = i['data']
+                    data = json.loads(dataJson)
+                    tgId = data['user_id']
+                    userName = data['user_name']
+                    result = asyncio.run(addUser(tgId, userName))
+                    continue
+                if i['type'] == 'switch_user':
+                    dataJson = i['data']
+                    data = json.loads(dataJson)
+                    tgId = data['tgid']
+                    val = data['val']
+                    result = asyncio.run(switchUserActivity(tgId, val))
+                    continue
 
-            for i in log:
-                asyncio.run(switchUserActivity(str(i['tgid']), True))
+                if result:
+                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                    dbCur.execute(f"update queue set status = %s where id=%s",
+                                  ('success', i['id']))
+                    conn.commit()
+                    dbCur.close()
+                    conn.close()
 
         except Exception as err:
             print('CHECK USERS ERROR')
@@ -2125,7 +2152,7 @@ def checkUsers():
             print(traceback.format_exc())
             pass
 
-        time.sleep(120)
+        time.sleep(10)
 
 
 def checkBackup():
@@ -2152,8 +2179,8 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
-    # threadcheckUsers = threading.Thread(target=checkUsers, name="checkUsers1")
-    # threadcheckUsers.start()
+    threadcheckUsers = threading.Thread(target=checkUsers, name="checkUsers1")
+    threadcheckUsers.start()
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
