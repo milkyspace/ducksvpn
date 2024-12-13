@@ -2213,7 +2213,7 @@ if __name__ == '__main__':
     threadcheckBackup.start()
 
     # asyncio.run(checkQueue())
-    asyncio.run(checkUsers())
+    # asyncio.run(checkUsers())
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
