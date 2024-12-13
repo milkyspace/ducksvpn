@@ -2127,13 +2127,13 @@ async def checkQueue():
                     data = json.loads(dataJson)
                     tgId = data['user_id']
                     userName = data['user_name']
-                    result = asyncio.run(addUser(str(tgId), str(userName)))
+                    result = await addUser(str(tgId), str(userName))
                 if i['type'] == 'switch_user':
                     dataJson = i['data']
                     data = json.loads(dataJson)
                     tgId = data['tgid']
                     val = data['val']
-                    result = asyncio.run(switchUserActivity(str(tgId), val))
+                    result = await switchUserActivity(str(tgId), val)
 
                 if result:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -2150,7 +2150,7 @@ async def checkQueue():
             print(traceback.format_exc())
             pass
 
-        asyncio.sleep(30)
+        await asyncio.sleep(30)
 
 
 async def checkUsers():
@@ -2165,7 +2165,7 @@ async def checkUsers():
             conn.close()
 
             for i in log:
-                asyncio.run(addUserQueue(i['tgid'], i['username']))
+                await addUserQueue(i['tgid'], i['username'])
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -2176,7 +2176,7 @@ async def checkUsers():
             conn.close()
 
             for i in log:
-                asyncio.run(switchUserActivityQueue(str(i['tgid']), True))
+                await switchUserActivityQueue(str(i['tgid']), True)
 
         except Exception as err:
             print('CHECK USERS ERROR')
@@ -2212,8 +2212,8 @@ if __name__ == '__main__':
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
 
-    # asyncio.run(checkQueue())
-    # asyncio.run(checkUsers())
+    asyncio.run(checkQueue())
+    asyncio.run(checkUsers())
 
     try:
         asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
