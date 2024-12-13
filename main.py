@@ -655,13 +655,15 @@ async def startSendNotRegistered(tgId, userName, fullName, messageText=''):
             await bot.send_message(admin,
                                    f"По ссылке от пользователя {referrerUser.username} ( {referrer_id} ) пришел новый пользователь: {comingUserInfo}")
 
-    # Приветствуем нового пользователя (реферала)
     user_dat = await User.GetInfo(tgId)
     trialText = e.emojize(f"Привет, {user_dat.fullname}!\n\r\n\r" \
                           f"🎁 <b>Дарим вам 7 дней бесплатного доступа!</b>\n\r\n\r" \
                           f"Пожалуйста, выберите тип телефона или планшета, для которого нужна инструкция для подключения:\n\r")
 
     trialButtons = await getTrialButtons()
+
+    print(tgId)
+    print(trialText)
     await bot.send_message(tgId, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
     await addUser(tgId, username)
