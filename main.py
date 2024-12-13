@@ -99,7 +99,7 @@ class MyStates(StatesGroup):
     findUsersByName = State()
     switchActiveUserManual = State()
     updateAllUsers = State()
-    update10Users = State()
+    update50Users = State()
     editUser = State()
     editUserResetTime = State()
 
@@ -1236,7 +1236,7 @@ async def Work_with_Message(m: types.Message):
     return
 
 
-@bot.message_handler(state=MyStates.update10Users, content_types=["text"])
+@bot.message_handler(state=MyStates.update50Users, content_types=["text"])
 async def Work_with_Message(m: types.Message):
     if e.demojize(m.text) == "Назад :right_arrow_curving_left:":
         await bot.delete_state(m.from_user.id)
@@ -1245,7 +1245,7 @@ async def Work_with_Message(m: types.Message):
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
-    dbCur.execute(f"SELECT * FROM userss order by id desc limit 10")
+    dbCur.execute(f"SELECT * FROM userss order by id desc limit 50")
     log = dbCur.fetchall()
     dbCur.close()
     conn.close()
@@ -1253,11 +1253,12 @@ async def Work_with_Message(m: types.Message):
     try:
         for i in log:
             user = await User.GetInfo(i['tgid'])
-            timenow = int(time.time())
-            if int(user.subscription) < timenow:
-                await switchUserActivity(str(i['tgid']), False)
-            if int(user.subscription) >= timenow:
-                await switchUserActivity(str(i['tgid']), True)
+            await addUser(i['tgid'], i['username'])
+            # timenow = int(time.time())
+            # if int(user.subscription) < timenow:
+            #     await switchUserActivity(str(i['tgid']), False)
+            # if int(user.subscription) >= timenow:
+            #     await switchUserActivity(str(i['tgid']), True)
 
     except Exception as err:
         print('UPDATE 10 USERS ERROR')
@@ -1479,10 +1480,10 @@ async def Work_with_Message(m: types.Message):
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
-        if e.demojize(m.text) == "Обновить последних 10 пользователей :man:":
-            await bot.set_state(m.from_user.id, MyStates.update10Users)
+        if e.demojize(m.text) == "Обновить последних 50 пользователей :man:":
+            await bot.set_state(m.from_user.id, MyStates.update50Users)
             await bot.send_message(m.from_user.id,
-                                   "Вы уверены, что хотите обновить последних 10 пользователей? Введите `Да`",
+                                   "Вы уверены, что хотите обновить последних 50 пользователей? Введите `Да`",
                                    reply_markup=await buttons.admin_buttons_back())
             return
 
