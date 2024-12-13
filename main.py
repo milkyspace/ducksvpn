@@ -2078,6 +2078,28 @@ def checkTime():
                         conn.close()
                     pass
 
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(addUser(i['tgid'], i['username']))
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(switchUserActivity(str(i['tgid']), True))
+
         except ApiTelegramException as exception:
             print("ApiTelegramException")
             print(exception.description)
