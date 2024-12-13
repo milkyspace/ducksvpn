@@ -1252,7 +1252,8 @@ async def Work_with_Message(m: types.Message):
 
     try:
         for i in log:
-            user = await User.GetInfo(i['tgid'])
+            # user = await User.GetInfo(i['tgid'])
+            print('Пользователь ' + i['tgid'])
             await addUser(i['tgid'], i['username'])
             # timenow = int(time.time())
             # if int(user.subscription) < timenow:
