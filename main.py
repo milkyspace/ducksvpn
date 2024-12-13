@@ -2184,7 +2184,7 @@ async def checkUsers():
             print(traceback.format_exc())
             pass
 
-        asyncio.sleep(120)
+        await asyncio.sleep(120)
 
 
 def checkBackup():
@@ -2205,6 +2205,10 @@ def checkBackup():
             print(traceback.format_exc())
             pass
 
+async def runMain():
+    await bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True)
+    await checkQueue()
+    await checkUsers()
 
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
@@ -2216,7 +2220,7 @@ if __name__ == '__main__':
     # asyncio.run(checkUsers())
 
     try:
-        asyncio.run(bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True))
+        asyncio.run(runMain())
     except Exception as err:
         print('asyncio error')
         print(err)
