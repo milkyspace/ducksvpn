@@ -2081,7 +2081,7 @@ def checkTime():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 120 MINUTE) ORDER BY id DESC LIMIT 200;")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
@@ -2092,7 +2092,7 @@ def checkTime():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 120 MINUTE) ORDER BY id DESC LIMIT 200")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
