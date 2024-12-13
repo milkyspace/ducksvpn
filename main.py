@@ -2128,19 +2128,17 @@ def checkUsers():
                     tgId = data['user_id']
                     userName = data['user_name']
                     result = asyncio.run(addUser(tgId, userName))
-                    continue
                 if i['type'] == 'switch_user':
                     dataJson = i['data']
                     data = json.loads(dataJson)
                     tgId = data['tgid']
                     val = data['val']
                     result = asyncio.run(switchUserActivity(tgId, val))
-                    continue
 
                 if result:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
                     dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                    dbCur.execute(f"update queue set status = %s where id=%s",
+                    dbCur.execute(f"delete from queue where id=%s",
                                   ('success', i['id']))
                     conn.commit()
                     dbCur.close()
