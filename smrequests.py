@@ -143,7 +143,7 @@ async def switchUserActivity(tgid, val):
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
-        data=json.dumps(update), timeout=120, verify=False)
+        data=json.dumps(update), timeout=240, verify=False)
     print('switchUserActivity response stop')
     print(response)
     if response:
