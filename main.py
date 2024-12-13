@@ -1,3 +1,5 @@
+from multiprocessing import Process
+
 import json
 import time
 from time import sleep
@@ -2210,6 +2212,11 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
+
+    p1 = Process(target=checkQueue, daemon=True)
+    p1.start()
+    p1.join()
+
     # threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1", daemon=True)
     # threadcheckQueue.start()
     # threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
