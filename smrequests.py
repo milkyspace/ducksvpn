@@ -51,7 +51,7 @@ async def addUser(userid, username, type=''):
             "name": str(username),
             "limit_ip": 3,
             "type": type,
-        }), timeout=120, verify=False)
+        }), timeout=10, verify=False)
 
     if response:
         return True
@@ -143,7 +143,7 @@ async def switchUserActivity(tgid, val):
         headers={"Accept": "application/json",
                  "Content-Type": "application/json",
                  "Authorization": token},
-        data=json.dumps(update), timeout=120, verify=False)
+        data=json.dumps(update), timeout=10, verify=False)
     print('switchUserActivity response stop')
     print(response)
     if response:
