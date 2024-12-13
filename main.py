@@ -2127,17 +2127,13 @@ def checkUsers():
                     data = json.loads(dataJson)
                     tgId = data['user_id']
                     userName = data['user_name']
-                    print(dataJson)
-                    print(data)
-                    print(tgId)
-                    print(userName)
-                    result = asyncio.run(addUser(tgId, userName))
+                    result = asyncio.run(addUser(str(tgId), str(userName)))
                 if i['type'] == 'switch_user':
                     dataJson = i['data']
                     data = json.loads(dataJson)
                     tgId = data['tgid']
                     val = data['val']
-                    result = asyncio.run(switchUserActivity(tgId, val))
+                    result = asyncio.run(switchUserActivity(str(tgId), val))
 
                 if result:
                     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
