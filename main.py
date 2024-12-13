@@ -2102,6 +2102,7 @@ def checkUsers():
             conn.close()
 
             for i in log:
+                print('Добавление пользователя')
                 print(i['tgid'])
                 result = asyncio.run(addUser(i['tgid'], i['username']))
                 print(result)
