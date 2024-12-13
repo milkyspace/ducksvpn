@@ -28,6 +28,7 @@ from telebot import types
 from telebot.asyncio_storage import StateMemoryStorage
 from telebot.asyncio_handler_backends import State, StatesGroup
 from buttons import main_buttons
+from backgroundtaskmanager import background_task_manager
 
 from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
 from queueusers import addUserQueue, switchUserActivityQueue
@@ -2110,45 +2111,48 @@ def checkTime():
 
 
 async def checkQueue():
-    print('run loop checkQueue')
-    try:
-        conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-        dbCur = conn.cursor(pymysql.cursors.DictCursor)
-        dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success'")
-        log = dbCur.fetchall()
-        dbCur.close()
-        conn.close()
+    while True:
+        print('run loop checkQueue')
+        try:
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success'")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
 
-        for i in log:
-            result = False
+            for i in log:
+                result = False
 
-            if i['type'] == 'add_user':
-                dataJson = i['data']
-                data = json.loads(dataJson)
-                tgId = data['user_id']
-                userName = data['user_name']
-                result = await addUser(str(tgId), str(userName))
-            if i['type'] == 'switch_user':
-                dataJson = i['data']
-                data = json.loads(dataJson)
-                tgId = data['tgid']
-                val = data['val']
-                result = await switchUserActivity(str(tgId), val)
+                if i['type'] == 'add_user':
+                    dataJson = i['data']
+                    data = json.loads(dataJson)
+                    tgId = data['user_id']
+                    userName = data['user_name']
+                    result = await addUser(str(tgId), str(userName))
+                if i['type'] == 'switch_user':
+                    dataJson = i['data']
+                    data = json.loads(dataJson)
+                    tgId = data['tgid']
+                    val = data['val']
+                    result = await switchUserActivity(str(tgId), val)
 
-            if result:
-                conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-                dbCur = conn.cursor(pymysql.cursors.DictCursor)
-                dbCur.execute(f"delete from queue where id=%s",
-                              (i['id']))
-                conn.commit()
-                dbCur.close()
-                conn.close()
+                if result:
+                    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+                    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+                    dbCur.execute(f"delete from queue where id=%s",
+                                  (i['id']))
+                    conn.commit()
+                    dbCur.close()
+                    conn.close()
 
-    except Exception as err:
-        print('CHECK QUEUE ERROR')
-        print(err)
-        print(traceback.format_exc())
-        pass
+        except Exception as err:
+            print('CHECK QUEUE ERROR')
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+        await asyncio.sleep(30)
 
 
 async def checkUsers():
@@ -2204,13 +2208,12 @@ def checkBackup():
             print(traceback.format_exc())
             pass
 
+
 async def runMain():
+    background_task_manager.add_task(checkQueue())
+    background_task_manager.add_task(checkUsers())
     await bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True)
 
-    while True:
-        await checkQueue()
-        await checkUsers()
-        await asyncio.sleep(60)
 
 if __name__ == '__main__':
     threadcheckTime = threading.Thread(target=checkTime, name="checkTime1")
