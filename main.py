@@ -2109,7 +2109,7 @@ def checkTime():
             pass
 
 
-def checkUsers():
+def checkQueue():
     while True:
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
@@ -2145,13 +2145,46 @@ def checkUsers():
                     conn.close()
 
         except Exception as err:
-            print('CHECK USERS ERROR')
+            print('CHECK QUEUE ERROR')
             print(err)
             print(traceback.format_exc())
             pass
 
         time.sleep(10)
 
+
+def checkUsers():
+    while True:
+        try:
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 60 MINUTE) ORDER BY id DESC LIMIT 100;")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(addUserQueue(i['tgid'], i['username']))
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 60 MINUTE) ORDER BY id DESC LIMIT 100")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                asyncio.run(switchUserActivityQueue(str(i['tgid']), True))
+
+        except Exception as err:
+            print('CHECK USERS ERROR')
+            print(err)
+            print(traceback.format_exc())
+            pass
+
+        time.sleep(120)
 
 def checkBackup():
     while True:
@@ -2177,7 +2210,9 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
-    threadcheckUsers = threading.Thread(target=checkUsers, name="checkUsers1")
+    threadcheckQueue = threading.Thread(target=checkQueue(), name="checkUsers1")
+    threadcheckQueue.start()
+    threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
     threadcheckUsers.start()
 
     try:
