@@ -2103,6 +2103,7 @@ def checkUsers():
             conn.close()
 
             for i in log:
+                print(i['tgid'])
                 asyncio.run(addUser(i['tgid'], i['username']))
 
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
