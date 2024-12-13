@@ -2111,6 +2111,7 @@ def checkTime():
 
 async def checkQueue():
     while True:
+        print('run loop checkQueue')
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -2155,6 +2156,7 @@ async def checkQueue():
 
 async def checkUsers():
     while True:
+        print('run loop checkUsers')
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
@@ -2217,7 +2219,8 @@ if __name__ == '__main__':
     threadcheckBackup.start()
 
     try:
-        asyncio.run(runMain())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(runMain())
     except Exception as err:
         print('asyncio error')
         print(err)
