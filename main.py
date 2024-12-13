@@ -2211,7 +2211,7 @@ def checkBackup():
 
 async def runMain():
     await bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True)
-    # background_task_manager.add_task(checkQueue())
+    background_task_manager.add_task(checkQueue())
     # background_task_manager.add_task(checkUsers())
 
 
