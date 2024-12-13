@@ -2150,7 +2150,7 @@ def checkQueue():
             print(traceback.format_exc())
             pass
 
-        time.sleep(10)
+        time.sleep(30)
 
 
 def checkUsers():
@@ -2210,8 +2210,8 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
-    # threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1")
-    # threadcheckQueue.start()
+    threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1")
+    threadcheckQueue.start()
     # threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
     # threadcheckUsers.start()
 
