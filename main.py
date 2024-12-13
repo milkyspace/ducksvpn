@@ -214,7 +214,7 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                 conn.close()
 
             additionalText = (
-                "\r\n\r\n<b>Важно!</b>." \
+                "\r\n\r\n<b>Важно!</b>" \
                 "\r\n<b>При первом подключении</b> ваш ключ может дойти на все серверы с задержкой <b>до 10 минут</b>." \
                 "\r\nПожалуйста, подождите <b>10 минут</b> и переподключитесь (выключите и включите впн в приложении)")
 
@@ -662,8 +662,6 @@ async def startSendNotRegistered(tgId, userName, fullName, messageText=''):
 
     trialButtons = await getTrialButtons()
 
-    print(tgId)
-    print(trialText)
     await bot.send_message(tgId, trialText, parse_mode="HTML", reply_markup=trialButtons)
 
     await addUser(tgId, username)
@@ -2129,6 +2127,10 @@ def checkUsers():
                     data = json.loads(dataJson)
                     tgId = data['user_id']
                     userName = data['user_name']
+                    print(dataJson)
+                    print(data)
+                    print(tgId)
+                    print(userName)
                     result = asyncio.run(addUser(tgId, userName))
                 if i['type'] == 'switch_user':
                     dataJson = i['data']
