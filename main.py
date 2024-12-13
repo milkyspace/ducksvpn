@@ -2159,7 +2159,7 @@ async def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 60 MINUTE) ORDER BY id DESC LIMIT 100;")
+                f"SELECT * FROM userss WHERE TIME(date_create) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15;")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
@@ -2170,7 +2170,7 @@ async def checkUsers():
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(
-                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 60 MINUTE) ORDER BY id DESC LIMIT 100")
+                f"SELECT * FROM payments WHERE TIME(time) > TIME(CURRENT_TIME() - INTERVAL 5 MINUTE) ORDER BY id DESC LIMIT 15")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
@@ -2215,9 +2215,6 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
-
-    # asyncio.run(checkQueue())
-    # asyncio.run(checkUsers())
 
     try:
         asyncio.run(runMain())
