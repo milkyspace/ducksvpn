@@ -2116,7 +2116,7 @@ async def checkQueue():
         try:
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success' order by id asc limit 10")
+            dbCur.execute(f"SELECT * FROM queue WHERE status <> 'success' order by id asc limit 5")
             log = dbCur.fetchall()
             dbCur.close()
             conn.close()
