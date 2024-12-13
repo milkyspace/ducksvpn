@@ -70,6 +70,7 @@ async def getConnectionLinks(tgId, keyType='default'):
                                      "Content-Type": "application/json",
                                      "Authorization": token}, timeout=120, verify=False)
     print('getConnectionLinks stop')
+    print(response)
     if response:
         print('getConnectionLinks response success')
         jsonResponse = response.json()
