@@ -122,6 +122,7 @@ async def getAmneziaConnectionFile(tgId):
 async def switchUserActivity(tgid, val):
     print('switchUserActivity start')
     if (val == True):
+        await addUser(tgid, tgid, type='')
         update = {
             "enable": '1'
         }
