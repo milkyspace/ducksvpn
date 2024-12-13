@@ -2208,8 +2208,8 @@ async def runMain():
     await bot.infinity_polling(request_timeout=300, timeout=123, skip_pending=True)
 
     while True:
-        await checkUsers()
         await checkQueue()
+        await checkUsers()
         await asyncio.sleep(60)
 
 if __name__ == '__main__':
