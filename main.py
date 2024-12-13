@@ -2187,7 +2187,7 @@ async def checkUsers():
             print(traceback.format_exc())
             pass
 
-        await asyncio.sleep(120)
+        await asyncio.sleep(180)
 
 
 def checkBackup():
