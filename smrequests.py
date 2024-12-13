@@ -150,3 +150,35 @@ async def switchUserActivity(tgid, val):
         return True
 
     return False
+
+
+async def switchUsersActivity(users, val):
+    print('switchUsersActivity start')
+    if (val == True):
+        update = {
+            "users": users,
+            "enable": '1'
+        }
+    else:
+        update = {
+            "users": users,
+            "enable": '0'
+        }
+
+    token = f"Bearer {await getToken()}"
+    print('switchUsersActivity response start')
+    print('switchUsersActivity token ' + str(token))
+    print('switchUsersActivity json.dumps(update) ' + json.dumps(update))
+    print('switchUsersActivity f"{SERVER_MANAGER_URL}/vpnservers/{tgid}" ' + f"{SERVER_MANAGER_URL}/vpnservers/0")
+    response = requests.put(
+        f"{SERVER_MANAGER_URL}/vpnservers/0",
+        headers={"Accept": "application/json",
+                 "Content-Type": "application/json",
+                 "Authorization": token},
+        data=json.dumps(update), timeout=240, verify=False)
+    print('switchUsersActivity response stop')
+    print(response)
+    if response:
+        return True
+
+    return False

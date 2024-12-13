@@ -28,7 +28,7 @@ from telebot.asyncio_storage import StateMemoryStorage
 from telebot.asyncio_handler_backends import State, StatesGroup
 from buttons import main_buttons
 
-from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, addUser
+from smrequests import getConnectionLinks, getAmneziaConnectionFile, switchUserActivity, switchUsersActivity, addUser
 from dbworker import User
 from pay import Pay
 
@@ -1204,28 +1204,35 @@ async def Work_with_Message(m: types.Message):
 
     conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
     dbCur = conn.cursor(pymysql.cursors.DictCursor)
-    dbCur.execute(f"SELECT * FROM userss order by id desc limit 1500")
+    dbCur.execute(f"SELECT * FROM userss where banned = true")
     log = dbCur.fetchall()
     dbCur.close()
     conn.close()
-
     try:
-        k = 1
+        disabled = []
         for i in log:
-            print(k)
-            user = await User.GetInfo(i['tgid'])
-            timenow = int(time.time())
-            if int(user.subscription) < timenow:
-                await switchUserActivity(str(i['tgid']), False)
-            if int(user.subscription) >= timenow:
-                await switchUserActivity(str(i['tgid']), True)
-            if k % 100 == 0:
-                await bot.send_message(m.from_user.id, f"{k} пользователей отправлены в очередь",
-                                       reply_markup=await buttons.admin_buttons())
-            k = k + 1
+            disabled.append(i['tgid'])
+        await switchUsersActivity(disabled, False)
+    except Exception as err:
+        print('UPDATE DISABLED USERS ERROR')
+        print(err)
+        print(traceback.format_exc())
+        pass
+
+    conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+    dbCur = conn.cursor(pymysql.cursors.DictCursor)
+    dbCur.execute(f"SELECT * FROM userss where banned = false")
+    log = dbCur.fetchall()
+    dbCur.close()
+    conn.close()
+    try:
+        enabled = []
+        for i in log:
+            enabled.append(i['tgid'])
+        await switchUsersActivity(enabled, True)
 
     except Exception as err:
-        print('UPDATE ALL USERS ERROR')
+        print('UPDATE ENABLED USERS ERROR')
         print(err)
         print(traceback.format_exc())
         pass
