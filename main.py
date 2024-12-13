@@ -2210,7 +2210,7 @@ if __name__ == '__main__':
     threadcheckTime.start()
     threadcheckBackup = threading.Thread(target=checkBackup, name="checkBackup1")
     threadcheckBackup.start()
-    threadcheckQueue = threading.Thread(target=checkQueue(), name="checkUsers1")
+    threadcheckQueue = threading.Thread(target=checkQueue(), name="checkQueue1")
     threadcheckQueue.start()
     threadcheckUsers = threading.Thread(target=checkUsers(), name="checkUsers1")
     threadcheckUsers.start()
