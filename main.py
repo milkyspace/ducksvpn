@@ -242,10 +242,12 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                 await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(instructionMacOS), parse_mode="HTML",
                                        disable_web_page_preview=True,
                                        reply_markup=await main_buttons(user_dat, True))
-                await bot.send_photo(user_dat.tgid, "https://img1.teletype.in/files/c7/94/c79495ad-e4fd-49d0-8121-0ead1a0e6f08.webp")
 
             await bot.send_message(chat_id=user_dat.tgid, text=f"<blockquote>{link}</blockquote>", parse_mode="HTML",
                                    reply_markup=await main_buttons(user_dat, True))
+
+            if (device == "MacOS"):
+                await bot.send_photo(user_dat.tgid, "https://img1.teletype.in/files/c7/94/c79495ad-e4fd-49d0-8121-0ead1a0e6f08.webp")
 
             if userKeyLog is None:
                 await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(additionalText), parse_mode="HTML",
