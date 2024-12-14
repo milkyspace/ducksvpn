@@ -3,6 +3,7 @@ import requests
 import json
 
 CONFIG = Config.getConfig()
+print(CONFIG)
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
