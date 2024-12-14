@@ -1,30 +1,37 @@
-from dbworker import User
 from telebot import types
 import emoji as e
 import time
 from datetime import datetime
 
-CONFIG={}
+from modules.users.dbworker import User
+from modules.bot.config import Config
 
-async def main_buttons(user: User, wasUpdate = None):
+CONFIG = Config.getConfig()
+
+async def main_buttons(user: User, wasUpdate=None):
     if wasUpdate:
         user = await User.GetInfo(user.tgid)
 
     Butt_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if user.subscription != "none" and user.subscription != None:
-        dateto = datetime.utcfromtimestamp(int(user.subscription)+CONFIG["UTC_time"]*3600).strftime('%d.%m.%Y %H:%M')
+        dateto = datetime.utcfromtimestamp(int(user.subscription) + CONFIG["UTC_time"] * 3600).strftime(
+            '%d.%m.%Y %H:%M')
         timenow = int(time.time())
-        if int(user.subscription)<timenow:
+        if int(user.subscription) < timenow:
             Butt_main.add(types.KeyboardButton(e.emojize(f":red_circle: Подписка закончилась: {dateto} МСК")))
-        if int(user.subscription)>=timenow:
+        if int(user.subscription) >= timenow:
             Butt_main.add(types.KeyboardButton(e.emojize(f":green_circle: Подписка активна до: {dateto} МСК")))
 
-        Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
-        Butt_main.add(types.KeyboardButton(e.emojize(f"Наши преимущества :gem_stone:")), types.KeyboardButton(e.emojize(f"Пригласить :wrapped_gift:")), types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
+        Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),
+                      types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
+        Butt_main.add(types.KeyboardButton(e.emojize(f"Наши преимущества :gem_stone:")),
+                      types.KeyboardButton(e.emojize(f"Пригласить :wrapped_gift:")),
+                      types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
 
         if user.tgid in CONFIG["admin_tg_id"]:
             Butt_main.add(types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
         return Butt_main
+
 
 async def admin_buttons():
     Butt_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -34,7 +41,8 @@ async def admin_buttons():
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить сообщение всем пользователям :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить сообщение всем пользователям Amnezia :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить сообщение всем неактивным пользователям :pencil:")))
-    Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить сообщение всем неактивным пользователям (с кнопкой Активировать подписку) :pencil:")))
+    Butt_admin.add(types.KeyboardButton(
+        e.emojize(f"Отправить сообщение всем неактивным пользователям (с кнопкой Активировать подписку) :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить напоминание о службе поддержки :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Отправить сообщение последним 50 пользователям :pencil:")))
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Поиск пользователя по никнейму :magnifying_glass_tilted_left:")))
@@ -45,6 +53,7 @@ async def admin_buttons():
     Butt_admin.add(types.KeyboardButton(e.emojize("Главное меню :right_arrow_curving_left:")))
     return Butt_admin
 
+
 async def admin_buttons_output_users():
     Butt_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
     Butt_admin.add(types.KeyboardButton(e.emojize(f"Пользователей с подпиской")))
@@ -52,11 +61,6 @@ async def admin_buttons_output_users():
     Butt_admin.add(types.KeyboardButton(e.emojize("Назад :right_arrow_curving_left:")))
     return Butt_admin
 
-async def admin_buttons_static_users():
-    Butt_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    Butt_admin.add(types.KeyboardButton(e.emojize(f"Добавить пользователя :plus:")))
-    Butt_admin.add(types.KeyboardButton(e.emojize("Назад :right_arrow_curving_left:")))
-    return Butt_admin
 
 async def admin_buttons_edit_user(user: User):
     Butt_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -65,6 +69,7 @@ async def admin_buttons_edit_user(user: User):
         Butt_admin.add(types.KeyboardButton(e.emojize(f"Обнулить время")))
     Butt_admin.add(types.KeyboardButton(e.emojize("Назад :right_arrow_curving_left:")))
     return Butt_admin
+
 
 async def admin_buttons_back():
     Butt_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
