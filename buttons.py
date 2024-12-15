@@ -23,7 +23,7 @@ async def main_buttons(user: User, wasUpdate=None):
 
         # 14.01.2025 23:59:59
         if timenow <= 1736873999 and user.tgid in CONFIG["admin_tg_id"]:
-            Butt_main.add(types.KeyboardButton(e.emojize(f"Подарить подписку на НГ :santa_claus:")))
+            Butt_main.add(types.KeyboardButton(e.emojize(f"Подарить подписку на НГ 🎅")))
         Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),
                       types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
         Butt_main.add(types.KeyboardButton(e.emojize(f"Наши преимущества :gem_stone:")),
