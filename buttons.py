@@ -22,7 +22,7 @@ async def main_buttons(user: User, wasUpdate=None):
             Butt_main.add(types.KeyboardButton(e.emojize(f":green_circle: Подписка активна до: {dateto} МСК")))
 
         # 14.01.2025 23:59:59
-        if timenow <= 1736873999 and user.tgid in CONFIG["admin_tg_id"] or user.tgid == 7582852956:
+        if timenow <= 1736873999:
             Butt_main.add(types.KeyboardButton(e.emojize(f"Подарить подписку на НГ 🎅")))
         Butt_main.add(types.KeyboardButton(e.emojize(f"Продлить подписку :money_bag:")),
                       types.KeyboardButton(e.emojize(f"Как подключить :gear:")))
