@@ -1501,13 +1501,7 @@ async def Work_with_Message(m: types.Message):
 
             for i in log:
                 try:
-                    supportButtons = types.InlineKeyboardMarkup(row_width=1)
-                    supportButtons.add(
-                        types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ 🎅"),
-                                                   callback_data="Help:GIFT"),
-                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
-                                                   url=SUPPORT_LINK),
-                    )
+                    userDatLog = await User.GetInfo(i['tgid'])
                     await bot.send_message(i['tgid'], emoji.emojize(f"<b>Что дарить на Новый Год?</b>🎅\r\n\r\n" \
                                                                     f"Друзья! До нового года осталось чуть больше 2х недель, пора позаботиться о подарках, коллегам, друзьям и родным!\r\n\r\n" \
                                                                     f"🎁Мы запускаем в продажу подарочные подписки на наш VPN. Период подписки вы можете выбрать любой!\r\n\r\n" \
@@ -1516,7 +1510,7 @@ async def Work_with_Message(m: types.Message):
                                                                     f"Небанальный и всегда актуальный подарок для коллег и близких🎄\n\r"
                                                                     f"По любым вопросам пишите {SUPPORT_USERNAME}"),
                                            parse_mode="HTML",
-                                           reply_markup=supportButtons)
+                                           reply_markup=await main_buttons(userDatLog, True))
                 except Exception as err:
                     print("sendMessageAboutGiftsToAllUser")
                     print(err)
