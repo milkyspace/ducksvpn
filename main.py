@@ -1552,7 +1552,7 @@ async def Work_with_Message(m: types.Message):
             await bot.set_state(m.from_user.id, MyStates.AdminNewUser)
             return
 
-    if e.demojize(m.text) in "Подарить подписку":
+    if "Подарить подписку" in m.text:
         await bot.send_message(chat_id=user_dat.tgid,
                                text=e.emojize(f"<b>Подарите подписку друзьям, коллегам и родным</b> 🎁" \
                                               f"\n\r\n\r1. Для этого необходимо выбрать период, на который вы хотите подарить подписку и оплатить ее." \
