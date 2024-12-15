@@ -467,7 +467,7 @@ def getCostBySale(month):
     perc3 = float(CONFIG['perc_3'])
     perc6 = float(CONFIG['perc_6'])
     perc12 = float(CONFIG['perc_12'])
-    perc24 = float(CONFIG['perc_12'])
+    perc24 = float(CONFIG['perc_12']) * 2
 
     if month == 3:
         cost = oneMonthCost * perc3
