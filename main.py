@@ -570,9 +570,10 @@ def paymentSuccess(paymentId):
                               parse_mode="HTML")
 
         for admin in CONFIG["admin_tg_id"]:
+            adminDat = asyncio.run(User.GetInfo(admin))
             BotCheck.send_message(admin,
                                   f"Новая оплата ПОДАРКА от {user_dat.username} ( {user_dat.tgid} ) на <b>{month}</b> мес. : {amount} руб.",
-                                  parse_mode="HTML")
+                                  parse_mode="HTML", reply_markup=asyncio.run(buttons.main_buttons(adminDat, True)))
         return
 
     try:
