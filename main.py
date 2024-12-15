@@ -1488,13 +1488,6 @@ async def Work_with_Message(m: types.Message):
             user_dat = await User.GetInfo(m.from_user.id)
             log = await user_dat.GetAllUsers()
 
-            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
-            dbCur = conn.cursor(pymysql.cursors.DictCursor)
-            dbCur.execute(f"SELECT * FROM userss where tgid=7582852956 or tgid=479423766 or tgid=187433643")
-            log = dbCur.fetchall()
-            dbCur.close()
-            conn.close()
-
             for i in log:
                 try:
                     userDatLog = await User.GetInfo(i['tgid'])
