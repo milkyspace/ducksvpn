@@ -1482,7 +1482,7 @@ async def Work_with_Message(m: types.Message):
                 try:
                     supportButtons = types.InlineKeyboardMarkup(row_width=1)
                     supportButtons.add(
-                        types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ :santa:"),
+                        types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ :santa_claus:"),
                                                    callback_data="Help:GIFT"),
                         types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
                                                    url=SUPPORT_LINK),
@@ -1552,7 +1552,7 @@ async def Work_with_Message(m: types.Message):
             await bot.set_state(m.from_user.id, MyStates.AdminNewUser)
             return
 
-    if e.demojize(m.text) == "Подарить подписку на VPN :santa:":
+    if e.demojize(m.text) == "Подарить подписку на НГ :santa_claus:":
         await bot.send_message(chat_id=user_dat.tgid,
                                text=e.emojize(f"<b>Подарите подписку друзьям, коллегам и родным</b> 🎁" \
                                               f"\n\r\n\r1. Для этого необходимо выбрать период, на который вы хотите подарить подписку и оплатить ее." \
@@ -1596,7 +1596,7 @@ async def Work_with_Message(m: types.Message):
                                        url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
             types.InlineKeyboardButton(e.emojize(":video_camera: Не работает TikTok?"), callback_data="Help:TIKTOK"),
-            types.InlineKeyboardButton(e.emojize("Подарить подписку на VPN :santa:"), callback_data="Help:GIFT"),
+            types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ :santa_claus:"), callback_data="Help:GIFT"),
         )
         if user_dat.type == 'amnezia':
             helpButtons.add(
