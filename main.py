@@ -534,14 +534,14 @@ def paymentSuccess(paymentId):
     user_dat = asyncio.run(User.GetInfo(tgid))
 
     if additional == 'gift':
-        secret = randomword(10)
+        secret = randomword(10).upper()
         giftId = asyncio.run(user_dat.newGift(paymentId, secret))
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
 
         giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift' + str(giftId)
         msg = e.emojize(f"<b>Скопируйте ссылку на подарок и секретный код и отправьте её получателю.</b>\n\r\n\r" \
                         f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<code>{giftLink}</code>\n\r\n\r" \
-                        f"Секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r<code>{secret}</code>" \
+                        f"Секретный код для активации подарка (кликните по нему, чтобы скопировать): \n\r\n\r<code>{secret}</code>\n\r\n\r" \
                         f"Когда обладатель подарка перейдет по ссылке, ему нужно будет нажать кнопку \"Запустить\", после этого мы поздравим его и продлим его подписку VPN Ducks!"
                         )
         BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
