@@ -1,5 +1,5 @@
 from modules.bot.config import Config
-from yookassapay import YooKassa
+from modules.pay.yookassapay import YooKassa
 
 CONFIG = Config.getConfig()
 

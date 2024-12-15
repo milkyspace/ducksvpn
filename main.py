@@ -1042,7 +1042,13 @@ async def toActivatePromo(call: types.CallbackQuery):
 @bot.message_handler(state="*", content_types=["text"])
 async def Work_with_Message(m: types.Message):
     print('Work_with_Message start')
-    user_dat = await User.GetInfo(m.chat.id)
+    try:
+        user_dat = await User.GetInfo(m.chat.id)
+        print(user_dat)
+    except Exception as err:
+        print(err)
+        print(traceback.format_exc())
+        pass
 
     if user_dat.registered == False:
         try:

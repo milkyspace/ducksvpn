@@ -32,4 +32,6 @@ class Config:
             "support_link": os.getenv("SUPPORT_LINK"),
             "support_username": os.getenv("SUPPORT_USERNAME"),
             "backup_dir": os.getenv("BACKUP_DIR"),
+            "yookassa_shop_id": os.getenv("YOOKASSA_SHOP_ID"),
+            "yookassa_secret_key": os.getenv("YOOKASSA_SECRET_KEY"),
         }

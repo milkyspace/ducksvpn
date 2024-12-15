@@ -3,12 +3,11 @@ import requests
 import json
 
 CONFIG = Config.getConfig()
-print(CONFIG)
 
 SERVER_MANAGER_URL = CONFIG["server_manager_url"]
 SERVER_MANAGER_EMAIL = CONFIG["server_manager_email"]
 SERVER_MANAGER_PASSWORD = CONFIG["server_manager_password"]
-SERVER_MANAGER_TOKEN = CONFIG["server_manager_token"]
+SERVER_MANAGER_TOKEN = CONFIG["server_manager_api_token"]
 
 
 async def getToken():
