@@ -2020,13 +2020,11 @@ def checkTime():
                                 e.emojize(f"Наши преимущества :gem_stone:")),
                             types.KeyboardButton(e.emojize(f"Пригласить :wrapped_gift:")),
                             types.KeyboardButton(e.emojize(f"Помощь :heart_hands:")))
-                        if i['tgid'] in CONFIG["admin_tg_id"]:
-                            Butt_main.add(
-                                types.KeyboardButton(e.emojize(f"Админ-панель :smiling_face_with_sunglasses:")))
 
+                        userDat = asyncio.run(User.GetInfo(i['tgid']))
                         BotCheck.send_message(i['tgid'],
                                               texts_for_bot["ended_sub_message"],
-                                              reply_markup=Butt_main, parse_mode="HTML")
+                                              reply_markup=asyncio.run(buttons.main_buttons(userDat, True)), parse_mode="HTML")
 
                         Butt_reffer = types.InlineKeyboardMarkup()
                         Butt_reffer.add(
