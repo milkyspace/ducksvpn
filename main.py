@@ -153,6 +153,9 @@ async def sendPayMessage(chatId, additionalParam=''):
 
     text = "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:"
     if 'gift' in additionalParam:
+        Butt_payment.add(
+            types.InlineKeyboardButton(e.emojize(f"2 года: {int(getCostBySale(24))} руб. (-{getSale(24)}%)"),
+                                       callback_data="BuyMonth:24" + additionalParam))
         text = "<b>Оплатить подарочный сертификат можно банковской картой</b>\n\r\n\rВыберите срок подписки, на который вы хотите сделать подарок:"
     await bot.send_message(chatId, text, disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
     print('sendPayMessage stop')
@@ -464,6 +467,7 @@ def getCostBySale(month):
     perc3 = float(CONFIG['perc_3'])
     perc6 = float(CONFIG['perc_6'])
     perc12 = float(CONFIG['perc_12'])
+    perc24 = float(CONFIG['perc_12'])
 
     if month == 3:
         cost = oneMonthCost * perc3
@@ -471,6 +475,8 @@ def getCostBySale(month):
         cost = oneMonthCost * perc6
     elif month == 12:
         cost = oneMonthCost * perc12
+    elif month == 24:
+        cost = oneMonthCost * perc24
     elif month == 100:
         cost = 60
 
@@ -483,6 +489,7 @@ def getSale(month):
     perc3 = float(CONFIG['perc_3'])
     perc6 = float(CONFIG['perc_6'])
     perc12 = float(CONFIG['perc_12'])
+    perc24 = float(CONFIG['perc_12'])
 
     if month == 3:
         sale = 100 - round((oneMonthCost * perc3 * 100) / cost)
@@ -490,6 +497,8 @@ def getSale(month):
         sale = 100 - round((oneMonthCost * perc6 * 100) / cost)
     elif month == 12:
         sale = 100 - round((oneMonthCost * perc12 * 100) / cost)
+    elif month == 24:
+        sale = 100 - round((oneMonthCost * perc24 * 100) / cost)
     else:
         sale = 0
     return sale
@@ -534,9 +543,22 @@ def paymentSuccess(paymentId):
     user_dat = asyncio.run(User.GetInfo(tgid))
 
     if additional == 'gift':
+        month = addTimeSubscribe / (30 * 24 * 60 * 60)
         secret = randomword(10).upper()
         giftId = asyncio.run(user_dat.newGift(paymentId, secret))
+
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
+
+        certImg = "https://img1.teletype.in/files/0b/77/0b779567-3d61-4408-b693-274f2fe338d5.png"
+        if int(month) == 3:
+            certImg = "https://img1.teletype.in/files/cf/4d/cf4dc798-c7f9-4cb2-91c7-10dfdfaa47cd.png"
+        if int(month) == 6:
+            certImg = "https://img1.teletype.in/files/47/a5/47a52f48-c4db-4fd0-88d1-0b9b8c1a6fa0.png"
+        if int(month) == 12:
+            certImg = "https://img4.teletype.in/files/7d/cf/7dcffdf2-fd28-4afa-b8a5-1a185b94e27b.png"
+        if int(month) == 24:
+            certImg = "https://img3.teletype.in/files/24/36/24369269-0d39-4400-9575-901146a5ee86.png"
+        BotCheck.send_photo(tgid, certImg)
 
         giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift' + str(giftId)
         msg = e.emojize(f"<b>Скопируйте ссылку на подарок и секретный код и отправьте её получателю.</b>\n\r\n\r" \
@@ -547,7 +569,6 @@ def paymentSuccess(paymentId):
         BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
                               parse_mode="HTML")
 
-        month = addTimeSubscribe / (30 * 24 * 60 * 60)
         for admin in CONFIG["admin_tg_id"]:
             BotCheck.send_message(admin,
                                   f"Новая оплата ПОДАРКА от {user_dat.username} ( {user_dat.tgid} ) на <b>{month}</b> мес. : {amount} руб.",
