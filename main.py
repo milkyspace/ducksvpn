@@ -1499,7 +1499,16 @@ async def Work_with_Message(m: types.Message):
                 try:
                     userDatLog = await User.GetInfo(i['tgid'])
                     certImg = "https://img1.teletype.in/files/44/1a/441aad4c-38db-4579-90f9-24ba1b8d6c50.png"
-                    BotCheck.send_photo(i['tgid'], certImg)
+
+                    giftButtons = types.InlineKeyboardMarkup(row_width=1)
+                    giftButtons.add(
+                        types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ 🎅"),
+                                                   callback_data="Help:GIFT"),
+                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                                   url=SUPPORT_LINK),
+                    )
+
+                    BotCheck.send_photo(i['tgid'], certImg, reply_markup=await main_buttons(userDatLog, True))
                     await bot.send_message(i['tgid'], emoji.emojize(f"<b>Что дарить на Новый Год?</b>🎅\r\n\r\n" \
                                                                     f"Друзья! До нового года осталось чуть больше 2х недель, пора позаботиться о подарках, коллегам, друзьям и родным!\r\n\r\n" \
                                                                     f"🎁Мы запускаем в продажу подарочные подписки на наш VPN. Период подписки вы можете выбрать любой!\r\n\r\n" \
@@ -1508,7 +1517,7 @@ async def Work_with_Message(m: types.Message):
                                                                     f"Небанальный и всегда актуальный подарок для коллег и близких🎄\n\r"
                                                                     f"По любым вопросам пишите {SUPPORT_USERNAME}"),
                                            parse_mode="HTML",
-                                           reply_markup=await main_buttons(userDatLog, True))
+                                           reply_markup=giftButtons)
                 except Exception as err:
                     print("sendMessageAboutGiftsToAllUser")
                     print(err)
