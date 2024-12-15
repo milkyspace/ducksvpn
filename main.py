@@ -777,14 +777,6 @@ async def Work_with_Message(m: types.Message):
                                    parse_mode="HTML",
                                    reply_markup=await main_buttons(userDat, True))
 
-            Butt_reffer = types.InlineKeyboardMarkup()
-            Butt_reffer.add(
-                types.InlineKeyboardButton(
-                    e.emojize(f"Пригласить друга :wrapped_gift:"),
-                    callback_data="Referrer"))
-            BotCheck.send_message(m.from_user.id, e.emojize(texts_for_bot["success_pay_message_2"]),
-                                  reply_markup=Butt_reffer, parse_mode="HTML")
-
             conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
             dbCur = conn.cursor(pymysql.cursors.DictCursor)
             dbCur.execute(f"update gifts set status='success', recipient_tgid=%s where id = %s",
