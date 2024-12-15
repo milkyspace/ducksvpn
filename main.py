@@ -1503,9 +1503,7 @@ async def Work_with_Message(m: types.Message):
                     giftButtons = types.InlineKeyboardMarkup(row_width=1)
                     giftButtons.add(
                         types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ 🎅"),
-                                                   callback_data="Help:GIFT"),
-                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
-                                                   url=SUPPORT_LINK),
+                                                   callback_data="Help:GIFT")
                     )
 
                     BotCheck.send_photo(i['tgid'], certImg, reply_markup=await main_buttons(userDatLog, True))
