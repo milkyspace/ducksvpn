@@ -769,6 +769,9 @@ async def Work_with_Message(m: types.Message):
             else:
                 monthText = str(monthСount) + ' месяцев'
 
+            await bot.send_sticker(m.from_user.id,
+                                   sticker='CAACAgIAAxkBAAEK7rFnXss_iZPxKWHKkzaSq2PqwXMf4wACGgADO2AkFIY6ayfus45lNgQ')
+
             await bot.send_message(m.from_user.id, e.emojize(f'<b>Поздравляем!</b>\r\n\r\n'
                                                              f'Подарок на {monthText} подписки на VPN DUCKS активирован :wrapped_gift:'),
                                    parse_mode="HTML",
@@ -2024,7 +2027,8 @@ def checkTime():
                         userDat = asyncio.run(User.GetInfo(i['tgid']))
                         BotCheck.send_message(i['tgid'],
                                               texts_for_bot["ended_sub_message"],
-                                              reply_markup=asyncio.run(buttons.main_buttons(userDat, True)), parse_mode="HTML")
+                                              reply_markup=asyncio.run(buttons.main_buttons(userDat, True)),
+                                              parse_mode="HTML")
 
                         Butt_reffer = types.InlineKeyboardMarkup()
                         Butt_reffer.add(
