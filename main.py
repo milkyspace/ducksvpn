@@ -153,7 +153,7 @@ async def sendPayMessage(chatId, additionalParam=''):
 
     text = "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:"
     if 'gift' in additionalParam:
-        text = "<b>Оплатить подарочный сертификат можно банковской картой</b>\n\r\n\rВыберите срок подписки,на который вы хотите сделать подарок:"
+        text = "<b>Оплатить подарочный сертификат можно банковской картой</b>\n\r\n\rВыберите срок подписки, на который вы хотите сделать подарок:"
     await bot.send_message(chatId, text, disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
     print('sendPayMessage stop')
 
