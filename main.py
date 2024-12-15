@@ -151,9 +151,10 @@ async def sendPayMessage(chatId, additionalParam=''):
 
     print('sendPayMessage send_message')
 
-    await bot.send_message(chatId,
-                           "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:",
-                           disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
+    text = "<b>Оплатить подписку можно банковской картой</b>\n\nОплата производится официально через сервис ЮКасса\nМы не сохраняем, не передаем и не имеем доступа к данным карт, используемых для оплаты\n\n<a href='https://telegra.ph/Publichnaya-oferta-11-03-5'>Условия использования</a>\n\nВыберите период, на который хотите приобрести подписку:"
+    if additionalParam == 'gift':
+        text = "<b>Оплатить подарочный сертификат можно банковской картой</b>\n\r\n\rВыберите срок подписки,на который вы хотите сделать подарок:"
+    await bot.send_message(chatId, text, disable_web_page_preview=True, reply_markup=Butt_payment, parse_mode="HTML")
     print('sendPayMessage stop')
 
 
@@ -247,7 +248,8 @@ async def sendConfigAndInstructions(chatId, device='iPhone', type='xui'):
                                    reply_markup=await main_buttons(user_dat, True))
 
             if (device == "MacOS"):
-                await bot.send_photo(user_dat.tgid, "https://img1.teletype.in/files/c7/94/c79495ad-e4fd-49d0-8121-0ead1a0e6f08.webp")
+                await bot.send_photo(user_dat.tgid,
+                                     "https://img1.teletype.in/files/c7/94/c79495ad-e4fd-49d0-8121-0ead1a0e6f08.webp")
 
             if userKeyLog is None:
                 await bot.send_message(chat_id=user_dat.tgid, text=e.emojize(additionalText), parse_mode="HTML",
@@ -537,12 +539,10 @@ def paymentSuccess(paymentId):
         BotCheck.send_message(tgid, e.emojize(texts_for_bot["success_pay_gift_message"]), parse_mode="HTML")
 
         giftLink = f"https://t.me/{CONFIG['bot_name']}?start=" + 'gift' + str(giftId)
-        msg = e.emojize(f"<b>Ссылка на подарок и секретный код активации</b>\n\r\n\r" \
-                        f":wrapped_gift: Скопируйте ссылку на подарок и отправьте её получателю.\n\r" \
-                        f"Когда обладатель подарка перейдет по ссылке, ему <b>нужно будет нажать кнопку \"Запустить\"</b>, после этого мы поздравим его и продлим его подписку VPN Ducks!\n\r\n\r" \
-                        f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<b><code>{giftLink}</code></b>\n\r\n\r" \
-                        f"Обязательно передайте получателю подарка секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r" \
-                        f"<b><code>{secret}</code></b>"
+        msg = e.emojize(f"<b>Скопируйте ссылку на подарок и секретный код и отправьте её получателю.</b>\n\r\n\r" \
+                        f"Подарочная ссылка (кликните по ней, чтобы скопировать): \n\r\n\r<code>{giftLink}</code>\n\r\n\r" \
+                        f"Секретный код для активации подарка (кликните по нему, чтобы скопировать):\n\r\n\r<code>{secret}</code>" \
+                        f"Когда обладатель подарка перейдет по ссылке, ему нужно будет нажать кнопку \"Запустить\", после этого мы поздравим его и продлим его подписку VPN Ducks!"
                         )
         BotCheck.send_message(tgid, msg, reply_markup=asyncio.run(buttons.main_buttons(user_dat, True)),
                               parse_mode="HTML")
@@ -1467,6 +1467,47 @@ async def Work_with_Message(m: types.Message):
 
             return
 
+        if e.demojize(m.text) == "Отправить всем сообщение о подарках :pencil:":
+            user_dat = await User.GetInfo(m.from_user.id)
+            log = await user_dat.GetAllUsers()
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(f"SELECT * FROM userss where tgid=7582852956 or tgid=479423766 or tgid=187433643")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
+
+            for i in log:
+                try:
+                    supportButtons = types.InlineKeyboardMarkup(row_width=1)
+                    supportButtons.add(
+                        types.InlineKeyboardButton(e.emojize("Подарить подписку на НГ :santa:"),
+                                                   callback_data="Help:GIFT"),
+                        types.InlineKeyboardButton(emoji.emojize(":woman_technologist: Чат с поддержкой"),
+                                                   url=SUPPORT_LINK),
+                    )
+                    await bot.send_message(i['tgid'], emoji.emojize(f"<b>Что дарить на Новый Год?</b>🎅\r\n\r\n" \
+                                                                    f"Друзья! До нового года осталось чуть больше 2х недель, пора позаботиться о подарках, коллегам, друзьям и родным!\r\n\r\n" \
+                                                                    f"🎁Мы запускаем в продажу подарочные подписки на наш VPN. Период подписки вы можете выбрать любой!\r\n\r\n" \
+                                                                    f"Купить подарочную подписку вы можете уже сейчас, а подарить хоть через год, потому что подписка активируется в момент, как вы отправляете персональную ссылку получателю.\r\n\r\n" \
+                                                                    f"Для того чтобы подарить подписку и узнать подробности, нажмите на кнопку <b>Подарить подписку на НГ</b> 🎅\r\n\r\n" \
+                                                                    f"Небанальный и всегда актуальный подарок для коллег и близких🎄\n\r"
+                                                                    f"По любым вопросам пишите {SUPPORT_USERNAME}"),
+                                           parse_mode="HTML",
+                                           reply_markup=supportButtons)
+                except Exception as err:
+                    print("sendMessageAboutGiftsToAllUser")
+                    print(err)
+                    print(traceback.format_exc())
+                    pass
+
+            await bot.send_message(m.from_user.id, "Сообщения отправлены", reply_markup=await buttons.admin_buttons())
+            await bot.send_message(m.from_user.id, f"{len(log)} пользователям",
+                                   reply_markup=await buttons.admin_buttons())
+
+            return
+
         if e.demojize(m.text) == "Отправить сообщение последним 50 пользователям :pencil:":
             await bot.set_state(m.from_user.id, MyStates.sendMessageToLast50User)
             await bot.send_message(m.from_user.id, "Введите сообщение:",
@@ -1511,6 +1552,17 @@ async def Work_with_Message(m: types.Message):
             await bot.set_state(m.from_user.id, MyStates.AdminNewUser)
             return
 
+    if e.demojize(m.text) == "Подарить подписку на VPN :santa:":
+        await bot.send_message(chat_id=user_dat.tgid,
+                               text=e.emojize(f"<b>Подарите подписку друзьям, коллегам и родным</b> 🎁" \
+                                              f"\n\r\n\r1. Для этого необходимо выбрать период, на который вы хотите подарить подписку и оплатить ее." \
+                                              f"\n\r\n\r2. После этого ответным сообщением  мы отправим вам ссылку и секретный код, которые вы отправите получателю подарка (ссылка и секретный код действуют неограниченное количество времени)." \
+                                              f"\n\r\n\r3. После того, как получатель подарка перейдет по ссылке и введет секретный код, у него активируется ваша подаренная подписка."
+                                              ),
+                               parse_mode="HTML")
+        await sendPayMessage(user_dat.tgid, 'gift')
+        return
+
     if e.demojize(m.text) == "Продлить подписку :money_bag:":
         await sendPayMessage(m.chat.id)
         return
@@ -1544,7 +1596,7 @@ async def Work_with_Message(m: types.Message):
                                        url="https://teletype.in/@vpnducks/faq"),
             types.InlineKeyboardButton(e.emojize("💳 Наши тарифы и стоимость"), callback_data="Help:PRICES"),
             types.InlineKeyboardButton(e.emojize(":video_camera: Не работает TikTok?"), callback_data="Help:TIKTOK"),
-            types.InlineKeyboardButton(e.emojize(":wrapped_gift: Подарить подписку"), callback_data="Help:GIFT"),
+            types.InlineKeyboardButton(e.emojize("Подарить подписку на VPN :santa:"), callback_data="Help:GIFT"),
         )
         if user_dat.type == 'amnezia':
             helpButtons.add(
@@ -1773,7 +1825,9 @@ async def Buy_month(call: types.CallbackQuery):
 
         text = f"<b>Оплата подписки на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подписку с помощью банковских карт, СБП и SberPay"
         if additional == 'gift':
-            text = f"<b>Оплата подписки в подарок :wrapped_gift: на {monthСount} {monthText}</b>\n\r\n\rДля оплаты откроется браузер.\n\rВы сможете оплатить подарок с помощью банковских карт, СБП и SberPay"
+            text = (f"<b>Оплата подарочного сертификата на {monthСount} {monthText}</b> 🎁" \
+                    f"\n\r\n\rДля оплаты откроется браузер." \
+                    f"\n\rВы сможете оплатить подарок с помощью банковских карт, СБП и SberPay")
 
         messageSend = await bot.send_message(chat_id=call.message.chat.id,
                                              text=emoji.emojize(text),
