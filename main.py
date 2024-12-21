@@ -1486,7 +1486,23 @@ async def Work_with_Message(m: types.Message):
 
         if e.demojize(m.text) == "Отправить всем сообщение о подарках :pencil:":
             user_dat = await User.GetInfo(m.from_user.id)
-            log = await user_dat.GetAllUsers()
+            # log = await user_dat.GetAllUsers()
+
+            # conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            # dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            # dbCur.execute(
+            #     f"SELECT * FROM userss WHERE TIME(date_create) > TIME(1734248409) ORDER BY id ASC;")
+            # log = dbCur.fetchall()
+            # dbCur.close()
+            # conn.close()
+
+            conn = pymysql.connect(host=DBHOST, user=DBUSER, password=DBPASSWORD, database=DBNAME)
+            dbCur = conn.cursor(pymysql.cursors.DictCursor)
+            dbCur.execute(
+                f"SELECT * FROM userss WHERE tgid={m.from_user.id};")
+            log = dbCur.fetchall()
+            dbCur.close()
+            conn.close()
 
             for i in log:
                 try:
